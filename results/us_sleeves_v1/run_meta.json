@@ -1,8 +1,9 @@
 {
-  "run_id": "20261127T053452Z-71c345",
-  "family": "us_sleeves_v1",
-  "git_commit": "fdd648f",
-  "data_fingerprint": "2b8e21624a2b",
+  "run_id": "20261127T055127Z-3ffc3a",
+  "family": "us",
+  "config_name": "us_sleeves_v1",
+  "git_commit": "a443e01",
+  "data_fingerprint": "95692b1d0f6f",
   "used_holdout": false,
   "oos_start": "2013-01-14",
   "data_end": "2024-12-31",
@@ -119,7 +120,9 @@
   "data_fixes": [],
   "config": {
     "name": "us_sleeves_v1",
+    "title": "US v1: index held + momentum ETFs",
     "market": "us",
+    "family": "us",
     "capital": 500,
     "fractional": true,
     "max_loss": 250,
