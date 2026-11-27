@@ -1,0 +1,36 @@
+# v2 changes ONE thing vs v1: the stable sleeve leaves the index when it is below its
+# 200-day average (well-known rule, not tuned here) and holds gold ETF instead.
+# India: stable sleeve = Nifty 50 ETF held; active sleeve = momentum across
+# large caps. KNOWN BIAS: the stock list is today's Nifty 50 leaders, so
+# history is survivorship-biased upward. Treat active results as optimistic.
+name: india_trend_v2
+title: "India v2: trend-filtered index + momentum"
+market: india
+family: india   # trial count shared by every India experiment
+capital: 44000            # INR, about $500 at an ASSUMED Rs 88/USD; update to the real rate
+fractional: false         # Indian brokers trade whole shares only
+max_loss: 22000           # kill switch: about $250, half of Max's total $500 loss limit
+start: "2008-01-01"
+download_start: "2005-01-01"
+holdout_start: "2025-01-01"
+benchmark: NIFTYBEES.NS
+universe: [NIFTYBEES.NS, GOLDBEES.NS, RELIANCE.NS, TCS.NS, HDFCBANK.NS, INFY.NS, ICICIBANK.NS,
+           HINDUNILVR.NS, ITC.NS, SBIN.NS, BHARTIARTL.NS, KOTAKBANK.NS, LT.NS, AXISBANK.NS,
+           ASIANPAINT.NS, MARUTI.NS, SUNPHARMA.NS, TITAN.NS, BAJFINANCE.NS, HCLTECH.NS, WIPRO.NS]
+stable: {strategy: trend_filter, params: {asset: NIFTYBEES.NS, window: 200, off_asset: GOLDBEES.NS, freq: W}}
+active:
+  strategy: momentum
+  params: {skip: 21, freq: M, universe: [GOLDBEES.NS, RELIANCE.NS, TCS.NS, HDFCBANK.NS, INFY.NS, ICICIBANK.NS,
+           HINDUNILVR.NS, ITC.NS, SBIN.NS, BHARTIARTL.NS, KOTAKBANK.NS, LT.NS, AXISBANK.NS,
+           ASIANPAINT.NS, MARUTI.NS, SUNPHARMA.NS, TITAN.NS, BAJFINANCE.NS, HCLTECH.NS, WIPRO.NS]}
+  grid: {lookback: [126, 252], top_n: [2, 3, 4]}
+train_years: 5
+test_years: 1
+allocations:
+  - {rule: fixed, stable_share: 0.9}
+  - {rule: fixed, stable_share: 0.8}
+  - {rule: fixed, stable_share: 0.7}
+  - {rule: fixed, stable_share: 0.6}
+  - {rule: fixed, stable_share: 0.5}
+  - {rule: vol_target, stable_share: 0.8, target_vol: 0.15, max_active: 0.4}
+  - {rule: drawdown_throttle, stable_share: 0.7, dd_limit: -0.15}

@@ -25,7 +25,10 @@ from .engine import BacktestResult, run_backtest
 from .metrics import TRADING_DAYS, deflated_sharpe, sharpe, summarize
 from .quality import fix_unadjusted_splits
 from .portfolio import allocation_series, combine_sleeves, walk_forward
+from .ml import ml_rank
 from .strategies import STRATEGIES
+
+STRATEGIES["ml_rank"] = ml_rank
 
 RESULTS = D.ROOT / "results"
 
@@ -117,10 +120,13 @@ def run_config(cfg: dict, use_holdout: bool = False, results_dir: Path = RESULTS
     results_dir.mkdir(parents=True, exist_ok=True)
     log = results_dir / "runs.jsonl"
     past = [json.loads(l) for l in log.read_text().splitlines()] if log.exists() else []
-    past_sr = [p["metrics"]["sharpe"] for p in past if p["family"] == name]
+    family = cfg.get("family", name)
+    past_sr = [p["metrics"]["sharpe"] for p in past if p["family"] == family]
     new_sr = [m["sharpe"] for m in rows.values()] + wf["trial_sharpes"]
     all_sr = np.array(past_sr + new_sr) / np.sqrt(TRADING_DAYS)
-    n_trials = len(all_sr)
+    adj_path = results_dir / "trial_adjustments.json"
+    untracked = json.loads(adj_path.read_text()).get(family, 0) if adj_path.exists() else 0
+    n_trials = len(all_sr) + untracked
     for label in rows:
         s = slice_result(variants[label], oos)
         rows[label]["dsr"] = round(deflated_sharpe(s.returns, n_trials, float(np.var(all_sr))), 3)
@@ -132,16 +138,21 @@ def run_config(cfg: dict, use_holdout: bool = False, results_dir: Path = RESULTS
         rows[label]["n_trials_family"] = n_trials
 
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ") + "-" + uuid.uuid4().hex[:6]
-    meta = {"run_id": run_id, "family": name, "git_commit": git_commit(),
+    meta = {"run_id": run_id, "family": family, "config_name": name, "git_commit": git_commit(),
             "data_fingerprint": D.fingerprint(close), "used_holdout": use_holdout,
             "oos_start": str(oos.date()), "data_end": str(close.index[-1].date()),
             "walk_forward_folds": wf["folds"], "data_fixes": quality_log, "config": cfg}
     with log.open("a") as f:
         for label, m in rows.items():
-            f.write(json.dumps({"run_id": run_id, "family": name, "variant": label,
+            f.write(json.dumps({"run_id": run_id, "family": family, "config": name, "variant": label,
                                 "time": meta["run_id"][:16], "git_commit": meta["git_commit"],
                                 "data_fingerprint": meta["data_fingerprint"],
                                 "used_holdout": use_holdout, "metrics": m}) + "\n")
+        # Walk-forward grid candidates are trials too.
+        for i, sr in enumerate(wf["trial_sharpes"]):
+            f.write(json.dumps({"run_id": run_id, "family": family, "config": name, "variant": f"grid_{i}",
+                                "time": meta["run_id"][:16], "used_holdout": use_holdout,
+                                "metrics": {"sharpe": round(sr, 3)}}) + "\n")
 
     out = results_dir / name
     out.mkdir(parents=True, exist_ok=True)

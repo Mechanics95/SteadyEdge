@@ -21,23 +21,24 @@ details{margin:12px 0}summary{cursor:pointer;color:var(--text-secondary)}
 .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;margin-bottom:6px}.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
 .tip{position:absolute;pointer-events:none;background:var(--surface-1);border:1px solid var(--grid);border-radius:6px;padding:6px 10px;font-size:12px;
 box-shadow:0 2px 8px rgba(0,0,0,.12);display:none;white-space:nowrap}
-code{font-size:12px}
+code{font-size:12px}nav{margin-top:18px;font-size:14px;line-height:1.9}a{color:var(--series-1)}
 </style></head>
 <body class="viz-root"><main>
 <h1>SteadyEdge</h1>
 <p class="muted">Research-first backtests for US and Indian equities: a stable index sleeve, an active momentum sleeve,
-and the split between them. Updated 2026-11-27 05:35 UTC.</p>
+and the split between them. Updated 2026-11-27 05:49 UTC.</p>
 <div class="disclaimer"><strong>Not financial advice.</strong> These are simulations on past data with modelled costs.
 Backtests usually look better than live trading and do not guarantee future results. Only out-of-sample (walk-forward)
 results are shown, and every variant ever tried is counted in the Deflated Sharpe Ratio.</div>
+<nav><strong>Experiments:</strong> <a href='#us_sleeves_v1'>us_sleeves_v1</a> · <a href='#india_sleeves_v1'>india_sleeves_v1</a></nav>
 
 <section>
-  <h2>United States</h2>
+  <h2 id="us_sleeves_v1">us_sleeves_v1</h2>
   <p class="muted">Out-of-sample window 2013-01-14 to 2024-12-31 · starting capital $500 ·
-  run <code>20261127T053452Z-71c345</code> · commit <code>fdd648f</code> · 16 trials counted</p>
+  run <code>20261127T053452Z-71c345</code> · commit <code>fdd648f</code> · 16 trials counted for this market</p>
   
   <h3>Growth of $500</h3>
-  <div class="chart" id="chart-us_sleeves_v1" role="img" aria-label="Growth of capital, United States"></div>
+  <div class="chart" id="chart-us_sleeves_v1" role="img" aria-label="Growth of capital, us_sleeves_v1"></div>
   <h3>Promotion gate: best variant (Blend 90/10) does not pass</h3>
   <ul class="gate"><li class='fail'><span aria-hidden='true'>✗</span> Beats index after costs <span class='muted'>(fail)</span></li><li class='fail'><span aria-hidden='true'>✗</span> Edge over index is statistically real (Deflated Sharpe of excess return &gt; 0.95) <span class='muted'>(fail)</span></li><li class='fail'><span aria-hidden='true'>✗</span> Max drawdown better than -25% <span class='muted'>(fail)</span></li><li class='pass'><span aria-hidden='true'>✓</span> Kill switch never fired <span class='muted'>(pass)</span></li></ul>
   <h3>All variants</h3>
@@ -54,12 +55,12 @@ results are shown, and every variant ever tried is counted in the Deflated Sharp
 </section>
 
 <section>
-  <h2>India</h2>
+  <h2 id="india_sleeves_v1">india_sleeves_v1</h2>
   <p class="muted">Out-of-sample window 2014-01-11 to 2024-12-31 · starting capital Rs 44,000 ·
-  run <code>20261127T053512Z-6cdd7a</code> · commit <code>fdd648f</code> · 16 trials counted</p>
+  run <code>20261127T053512Z-6cdd7a</code> · commit <code>fdd648f</code> · 16 trials counted for this market</p>
   <p class='note'>Known bias: the India stock list is today's large caps, so history is survivorship-biased upward. Treat active-sleeve results as optimistic.</p>
   <h3>Growth of Rs 44,000</h3>
-  <div class="chart" id="chart-india_sleeves_v1" role="img" aria-label="Growth of capital, India"></div>
+  <div class="chart" id="chart-india_sleeves_v1" role="img" aria-label="Growth of capital, india_sleeves_v1"></div>
   <h3>Promotion gate: best variant (Blend, volatility target) does not pass</h3>
   <ul class="gate"><li class='pass'><span aria-hidden='true'>✓</span> Beats index after costs <span class='muted'>(pass)</span></li><li class='fail'><span aria-hidden='true'>✗</span> Edge over index is statistically real (Deflated Sharpe of excess return &gt; 0.95) <span class='muted'>(fail)</span></li><li class='fail'><span aria-hidden='true'>✗</span> Max drawdown better than -25% <span class='muted'>(fail)</span></li><li class='pass'><span aria-hidden='true'>✓</span> Kill switch never fired <span class='muted'>(pass)</span></li></ul>
   <h3>All variants</h3>

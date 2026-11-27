@@ -15,16 +15,17 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: "3.12"}
-      - run: pip install -e ".[data,dev]"
+      - run: pip install -e ".[data,ml,dev]"
       - run: pytest -q
-      - name: US
+      - name: Download data and run every experiment
         run: |
-          python -m steadyedge download --config configs/us_sleeves.yaml
-          python -m steadyedge run --config configs/us_sleeves.yaml
-      - name: India
-        run: |
-          python -m steadyedge download --config configs/india_sleeves.yaml
-          python -m steadyedge run --config configs/india_sleeves.yaml
+          for cfg in configs/*.yaml; do
+            case "$cfg" in *synthetic*) continue;; esac
+            echo "::group::$cfg"
+            python -m steadyedge download --config "$cfg"
+            python -m steadyedge run --config "$cfg"
+            echo "::endgroup::"
+          done
       - run: python scripts/build_site.py
       - name: Commit results (keeps the trial log and proofs in the repo)
         run: |

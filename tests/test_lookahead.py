@@ -39,3 +39,12 @@ def test_detector_catches_a_cheater():
     def cheater(c):  # peeks at tomorrow's close
         return (c.shift(-1) > c).astype(float) / c.shape[1]
     assert leaks(cheater, CLOSE)
+
+
+def test_ml_rank_has_no_lookahead():
+    from steadyedge.ml import ml_rank
+    close = synthetic(n_assets=6, years=8, seed=4)["close"]
+    fn = lambda c: ml_rank(c, top_n=2, train_years=3, min_train_rows=200, max_iter=30)
+    w = fn(close)
+    assert w.notna().any(axis=1).sum() > 24          # it actually trades
+    assert not leaks(fn, close, cuts=[1300, 1650, 1900])

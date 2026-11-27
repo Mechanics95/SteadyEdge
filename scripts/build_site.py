@@ -18,7 +18,17 @@ ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "results"
 SITE = ROOT / "site"
 
-MARKETS = [("us_sleeves_v1", "United States", "$"), ("india_sleeves_v1", "India", "Rs ")]
+def discover() -> list[tuple[str, str, str]]:
+    """Every non-synthetic experiment in results/, US first, then by name."""
+    out = []
+    for d in sorted(RESULTS.glob("*/run_meta.json")):
+        cfg = json.loads(d.read_text())["config"]
+        if cfg.get("data") == "synthetic":
+            continue
+        cur = "$" if cfg["market"] == "us" else "Rs "
+        out.append((d.parent.name, cfg.get("title", d.parent.name), cur, cfg["market"]))
+    out.sort(key=lambda x: (x[3] != "us", x[0]))
+    return [(a, b, c) for a, b, c, _ in out]
 CHART_SERIES = [("benchmark_buy_hold", "Index (buy and hold)"),
                 ("active_only", "Active sleeve only"),
                 ("blend_fixed_80", "Blend 80% stable / 20% active")]
@@ -91,9 +101,9 @@ def market_section(name: str, title: str, cur: str) -> tuple[str, dict]:
 
     sec = f"""
 <section>
-  <h2>{title}</h2>
+  <h2 id="{name}">{html.escape(title)}</h2>
   <p class="muted">Out-of-sample window {meta['oos_start']} to {meta['data_end']} · starting capital {cur}{cap:,} ·
-  run <code>{meta['run_id']}</code> · commit <code>{meta['git_commit']}</code> · {metrics[best_k]['n_trials_family']} trials counted</p>
+  run <code>{meta['run_id']}</code> · commit <code>{meta['git_commit']}</code> · {metrics[best_k]['n_trials_family']} trials counted for this market</p>
   {bias}
   <h3>Growth of {cur}{cap:,}</h3>
   <div class="chart" id="chart-{name}" role="img" aria-label="Growth of capital, {title}"></div>
@@ -137,7 +147,7 @@ details{margin:12px 0}summary{cursor:pointer;color:var(--text-secondary)}
 .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;margin-bottom:6px}.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
 .tip{position:absolute;pointer-events:none;background:var(--surface-1);border:1px solid var(--grid);border-radius:6px;padding:6px 10px;font-size:12px;
 box-shadow:0 2px 8px rgba(0,0,0,.12);display:none;white-space:nowrap}
-code{font-size:12px}
+code{font-size:12px}nav{margin-top:18px;font-size:14px;line-height:1.9}a{color:var(--series-1)}
 </style></head>
 <body class="viz-root"><main>
 <h1>SteadyEdge</h1>
@@ -146,6 +156,7 @@ and the split between them. Updated __UPDATED__.</p>
 <div class="disclaimer"><strong>Not financial advice.</strong> These are simulations on past data with modelled costs.
 Backtests usually look better than live trading and do not guarantee future results. Only out-of-sample (walk-forward)
 results are shown, and every variant ever tried is counted in the Deflated Sharpe Ratio.</div>
+__TOC__
 __SECTIONS__
 <h2>How it works</h2>
 <p>Each evening the strategy decides what to hold; trades fill at the next morning's open with modelled fees and slippage.
@@ -200,14 +211,16 @@ for(const [id,c] of Object.entries(DATA)) draw('chart-'+id,c);
 
 def main() -> None:
     sections, data = [], {}
-    for name, title, cur in MARKETS:
+    for name, title, cur in discover():
         s, c = market_section(name, title, cur)
         sections.append(s)
         if c:
             data[name] = c
     updated = pd.Timestamp.now(tz="UTC").strftime("%Y-%m-%d %H:%M UTC")
-    page = PAGE.replace("__SECTIONS__", "\n".join(sections)).replace("__DATA__", json.dumps(data)) \
-               .replace("__UPDATED__", updated)
+    toc = "<nav><strong>Experiments:</strong> " + " · ".join(
+        f"<a href='#{n}'>{html.escape(t)}</a>" for n, t, _ in discover()) + "</nav>"
+    page = PAGE.replace("__TOC__", toc).replace("__SECTIONS__", "\n".join(sections)) \
+               .replace("__DATA__", json.dumps(data)).replace("__UPDATED__", updated)
     SITE.mkdir(exist_ok=True)
     (SITE / "index.html").write_text(page)
     print(f"wrote {SITE / 'index.html'} ({len(page) // 1024} KB)", file=sys.stderr)

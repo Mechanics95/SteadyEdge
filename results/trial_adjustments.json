@@ -1,0 +1,5 @@
+{
+  "_note": "Trials run before the trial log was committed (two research runs on 2026-11-27, 10 variants + 6 grid candidates each, per market). Added to n_trials so Deflated Sharpe is not flattered.",
+  "us": 32,
+  "india": 32
+}

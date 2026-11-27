@@ -1,7 +1,9 @@
 # US: stable sleeve = S&P 500 ETF held; active sleeve = momentum across
 # sector / asset-class ETFs (ETFs avoid single-stock survivorship bias).
 name: us_sleeves_v1
+title: "US v1: index held + momentum ETFs"
 market: us
+family: us   # trial count for Deflated Sharpe is shared by every US experiment
 capital: 500              # USD, Robinhood-style account
 fractional: true          # Robinhood supports fractional shares
 max_loss: 250             # kill switch: half of Max's total $500 loss limit

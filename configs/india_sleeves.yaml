@@ -2,7 +2,9 @@
 # large caps. KNOWN BIAS: the stock list is today's Nifty 50 leaders, so
 # history is survivorship-biased upward. Treat active results as optimistic.
 name: india_sleeves_v1
+title: "India v1: Nifty ETF held + momentum large caps"
 market: india
+family: india   # trial count shared by every India experiment
 capital: 44000            # INR, about $500 at an ASSUMED Rs 88/USD; update to the real rate
 fractional: false         # Indian brokers trade whole shares only
 max_loss: 22000           # kill switch: about $250, half of Max's total $500 loss limit
