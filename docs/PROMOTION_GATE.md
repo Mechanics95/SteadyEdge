@@ -3,7 +3,7 @@
 A model moves from backtest to paper trading only if **all** hold, per market:
 
 1. Beats its benchmark (buy-and-hold index ETF) on walk-forward out-of-sample results **after costs**.
-2. Deflated Sharpe Ratio > 0.95 using the family's full trial count.
+2. Deflated Sharpe Ratio of the **excess return over the index** (`dsr_vs_index`) > 0.95, using the family's full trial count.
 3. Out-of-sample max drawdown no worse than 25%, and the kill switch never fires.
 4. Survives regimes: positive excess return in at least 60% of test years, including one bear year.
 5. Robust: neighbouring parameter values also beat the benchmark.

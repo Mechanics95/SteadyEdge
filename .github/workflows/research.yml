@@ -3,22 +3,43 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "30 1 * * 6"   # Saturdays 01:30 UTC
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency: {group: research, cancel-in-progress: false}
 jobs:
   run:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        config: [configs/us_sleeves.yaml, configs/india_sleeves.yaml]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: "3.12"}
       - run: pip install -e ".[data,dev]"
       - run: pytest -q
-      - run: python -m steadyedge download --config ${{ matrix.config }}
-      - run: python -m steadyedge run --config ${{ matrix.config }}
-      - uses: actions/upload-artifact@v4
-        with:
-          name: results-${{ strategy.job-index }}
-          path: results/
+      - name: US
+        run: |
+          python -m steadyedge download --config configs/us_sleeves.yaml
+          python -m steadyedge run --config configs/us_sleeves.yaml
+      - name: India
+        run: |
+          python -m steadyedge download --config configs/india_sleeves.yaml
+          python -m steadyedge run --config configs/india_sleeves.yaml
+      - run: python scripts/build_site.py
+      - name: Commit results (keeps the trial log and proofs in the repo)
+        run: |
+          git config user.name "steadyedge-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add results/ site/
+          git commit -m "Research run $(date -u +%Y-%m-%dT%H:%MZ)" || echo "nothing to commit"
+          git push
+      - uses: actions/upload-pages-artifact@v3
+        with: {path: site}
+  deploy:
+    needs: run
+    runs-on: ubuntu-latest
+    continue-on-error: true   # needs Settings > Pages > Source = GitHub Actions
+    environment: {name: github-pages, url: "${{ steps.d.outputs.page_url }}"}
+    steps:
+      - id: d
+        uses: actions/deploy-pages@v4

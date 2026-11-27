@@ -124,6 +124,11 @@ def run_config(cfg: dict, use_holdout: bool = False, results_dir: Path = RESULTS
     for label in rows:
         s = slice_result(variants[label], oos)
         rows[label]["dsr"] = round(deflated_sharpe(s.returns, n_trials, float(np.var(all_sr))), 3)
+        # Is the EDGE over the index real? Same deflation, applied to daily
+        # excess returns. This is the number the promotion gate uses.
+        excess = s.returns - bench_r.reindex(s.returns.index).fillna(0.0)
+        rows[label]["dsr_vs_index"] = (round(deflated_sharpe(excess, n_trials, float(np.var(all_sr))), 3)
+                                       if excess.std() > 0 else None)
         rows[label]["n_trials_family"] = n_trials
 
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ") + "-" + uuid.uuid4().hex[:6]
@@ -141,6 +146,13 @@ def run_config(cfg: dict, use_holdout: bool = False, results_dir: Path = RESULTS
     out = results_dir / name
     out.mkdir(parents=True, exist_ok=True)
     pd.DataFrame(equity).to_csv(out / "equity.csv")
+    (out / "metrics.json").write_text(json.dumps(rows, indent=2, default=str))
+    trades = []
+    for label in ("active_only", "stable_only"):
+        t = slice_result(variants[label], oos).trades.copy()
+        t.insert(0, "variant", label)
+        trades.append(t)
+    pd.concat(trades).to_csv(out / "trades.csv", index=False)
     (out / "run_meta.json").write_text(json.dumps(meta, indent=2, default=str))
     (out / "report.md").write_text(render_report(cfg, meta, rows))
     return {"meta": meta, "metrics": rows}
@@ -149,7 +161,7 @@ def run_config(cfg: dict, use_holdout: bool = False, results_dir: Path = RESULTS
 def render_report(cfg: dict, meta: dict, rows: dict) -> str:
     cur = "$" if cfg["market"] == "us" else ("Rs " if cfg["market"] == "india" else "")
     cols = ["cagr", "vol", "sharpe", "max_drawdown", "worst_12m", "annual_turnover",
-            "cost_drag_pct_of_capital_per_year", "excess_cagr", "dsr", "final_equity", "killed_on"]
+            "cost_drag_pct_of_capital_per_year", "excess_cagr", "dsr", "dsr_vs_index", "final_equity", "killed_on"]
     hdr = "| variant | " + " | ".join(cols) + " |\n|" + "---|" * (len(cols) + 1) + "\n"
     body = "".join("| " + k + " | " + " | ".join(str(v.get(c, "")) for c in cols) + " |\n" for k, v in rows.items())
     synth = cfg.get("data") == "synthetic"
@@ -182,7 +194,8 @@ def render_report(cfg: dict, meta: dict, rows: dict) -> str:
         "## How to read this",
         "",
         "- `dsr` (Deflated Sharpe Ratio) is the probability the Sharpe is real after accounting for "
-        "how many variants were tried. Promotion gate needs > 0.95.",
+        "how many variants were tried. `dsr_vs_index` asks the same of the edge over the index; "
+        "the promotion gate needs `dsr_vs_index` > 0.95.",
         "- `cost_drag_pct_of_capital_per_year` is fees and slippage as a share of starting capital.",
         "- `excess_cagr` is versus simply holding the benchmark (benchmark has no kill switch).",
         "- `killed_on`: date the $-loss kill switch fired and the variant went to cash for good.",

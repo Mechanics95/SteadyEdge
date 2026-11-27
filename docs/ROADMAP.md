@@ -1,7 +1,7 @@
 # Roadmap
 
 - [x] **1a. Foundation**: engine, US/India costs, baselines, sleeves, allocation rules, walk-forward, trial log, leak tests.
-- [ ] **1a. First real-data results**: run `us_sleeves_v1` and `india_sleeves_v1` on free data (GitHub Actions).
+- [x] **1a. First real-data results** on free data (GitHub Actions) and public dashboard.
 - [ ] **1b. More baselines**: trend-filtered stable sleeve, RSI reversion and breakout active sleeves, regime breakdown by year.
 - [ ] **1b. After-tax line**: STCG/LTCG for India, short/long term for US.
 - [ ] **1c. ML active sleeve**: feature pipeline, purged/embargoed CV, LightGBM ranking, compared to momentum.
