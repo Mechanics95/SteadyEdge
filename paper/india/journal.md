@@ -1,6 +1,6 @@
 # Paper trading journal: india
 
-Simulated only, no real orders. Strategy: configs/india_trend_v2.yaml, 80% stable / 19% active. Start 2026-11-27.
+Simulated only, no real orders. Strategy: configs/india_trend_v2.yaml, 80% stable / 20% active. Start 2026-11-27.
 
 ## 2026-11-27
 - Equity 44,000.00 (+0.00%) vs index 44,000.00 (+0.00%); day P&L +0.00

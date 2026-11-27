@@ -103,7 +103,7 @@ def run_paper(market: str, config_path: str, stable_share: float = 0.8, out_root
     if not journal.exists():
         journal.write_text(f"# Paper trading journal: {market}\n\nSimulated only, no real orders. "
                            f"Strategy: {config_path}, {int(stable_share * 100)}% stable / "
-                           f"{int((1 - stable_share) * 100)}% active. Start {meta['start']}.\n\n")
+                           f"{round((1 - stable_share) * 100)}% active. Start {meta['start']}.\n\n")
     if f"## {summary['date']}" not in journal.read_text():
         tgt = decisions.loc[today].dropna()
         tgt = ", ".join(f"{k} {v:.0%}" for k, v in tgt[tgt > 0].items()) or "all cash"
