@@ -1,0 +1,28 @@
+# US: stable sleeve = S&P 500 ETF held; active sleeve = momentum across
+# sector / asset-class ETFs (ETFs avoid single-stock survivorship bias).
+name: us_sleeves_v1
+market: us
+capital: 500              # USD, Robinhood-style account
+fractional: true          # Robinhood supports fractional shares
+max_loss: 250             # kill switch: half of Max's total $500 loss limit
+start: "2007-01-01"
+download_start: "2005-01-01"
+holdout_start: "2025-01-01"   # sealed until a final candidate exists
+benchmark: SPY
+universe: [SPY, QQQ, IWM, EFA, EEM, TLT, IEF, GLD,
+           XLK, XLF, XLE, XLV, XLY, XLP, XLI, XLU, XLB]
+stable: {strategy: buy_and_hold, params: {weights: {SPY: 1.0}, freq: Q}}
+active:
+  strategy: momentum
+  params: {skip: 21, freq: M, universe: [QQQ, IWM, EFA, EEM, TLT, IEF, GLD, XLK, XLF, XLE, XLV, XLY, XLP, XLI, XLU, XLB]}
+  grid: {lookback: [126, 252], top_n: [2, 3, 4]}
+train_years: 5
+test_years: 1
+allocations:
+  - {rule: fixed, stable_share: 0.9}
+  - {rule: fixed, stable_share: 0.8}
+  - {rule: fixed, stable_share: 0.7}
+  - {rule: fixed, stable_share: 0.6}
+  - {rule: fixed, stable_share: 0.5}
+  - {rule: vol_target, stable_share: 0.8, target_vol: 0.15, max_active: 0.4}
+  - {rule: drawdown_throttle, stable_share: 0.7, dd_limit: -0.15}

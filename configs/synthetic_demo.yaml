@@ -1,0 +1,24 @@
+# Code check on random data. Results mean nothing about real markets.
+name: synthetic_demo
+data: synthetic
+synthetic: {n_assets: 6, years: 15, seed: 7}
+market: us
+capital: 500
+fractional: true
+max_loss: 250
+holdout_start: "2020-06-01"
+benchmark: A0
+universe: [A0, A1, A2, A3, A4, A5]
+stable: {strategy: buy_and_hold, params: {weights: {A0: 1.0}, freq: Q}}
+active:
+  strategy: momentum
+  params: {skip: 21, freq: M, universe: [A1, A2, A3, A4, A5]}
+  grid: {lookback: [126, 252], top_n: [1, 2]}
+train_years: 4
+test_years: 1
+allocations:
+  - {rule: fixed, stable_share: 0.9}
+  - {rule: fixed, stable_share: 0.7}
+  - {rule: fixed, stable_share: 0.5}
+  - {rule: vol_target, stable_share: 0.8, target_vol: 0.15, max_active: 0.4}
+  - {rule: drawdown_throttle, stable_share: 0.7, dd_limit: -0.15}

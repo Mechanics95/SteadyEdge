@@ -1,0 +1,24 @@
+name: research-run
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 1 * * 6"   # Saturdays 01:30 UTC
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        config: [configs/us_sleeves.yaml, configs/india_sleeves.yaml]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install -e ".[data,dev]"
+      - run: pytest -q
+      - run: python -m tradelab download --config ${{ matrix.config }}
+      - run: python -m tradelab run --config ${{ matrix.config }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: results-${{ strategy.job-index }}
+          path: results/

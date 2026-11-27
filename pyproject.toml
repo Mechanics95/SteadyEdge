@@ -1,0 +1,21 @@
+[project]
+name = "tradelab"
+version = "0.1.0"
+description = "Research-only backtesting and experiment framework for US and Indian equities. Not financial advice."
+requires-python = ">=3.10"
+license = {text = "MIT"}
+dependencies = ["numpy>=1.24", "pandas>=2.0", "scipy>=1.10", "pyyaml>=6.0"]
+
+[project.optional-dependencies]
+data = ["yfinance>=0.2.40"]
+dev = ["pytest>=7"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["tradelab"]
