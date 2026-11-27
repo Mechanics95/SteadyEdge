@@ -23,6 +23,7 @@ from . import data as D
 from .costs import make_cost_model
 from .engine import BacktestResult, run_backtest
 from .metrics import TRADING_DAYS, deflated_sharpe, sharpe, summarize
+from .quality import fix_unadjusted_splits
 from .portfolio import allocation_series, combine_sleeves, walk_forward
 from .strategies import STRATEGIES
 
@@ -60,6 +61,9 @@ def run_config(cfg: dict, use_holdout: bool = False, results_dir: Path = RESULTS
     bars = {k: v.loc[v.index >= pd.Timestamp(cfg.get("start", "1900-01-01"))] for k, v in bars.items()}
     bars = D.apply_holdout(bars, cfg.get("holdout_start"), use_holdout, name)
     open_, close = bars["open"], bars["close"]
+    quality_log = []
+    if cfg.get("data") != "synthetic":
+        open_, close, quality_log = fix_unadjusted_splits(open_, close)
     cost = make_cost_model(cfg["market"], cfg.get("cost_overrides"))
     cap, frac, max_loss = cfg["capital"], cfg.get("fractional", False), cfg.get("max_loss")
 
@@ -79,13 +83,26 @@ def run_config(cfg: dict, use_holdout: bool = False, results_dir: Path = RESULTS
     w_stable = _weights(cfg["stable"], close)
     w_bench = STRATEGIES["buy_and_hold"](close, weights={cfg["benchmark"]: 1.0})
 
+    # Signal-only run of the active sleeve over all history (no kill switch):
+    # allocation rules read its past returns.
     active_alone = bt(w_active, kill=False)
-    variants = {"benchmark_buy_hold": bt(w_bench), "stable_only": bt(w_stable), "active_only": active_alone}
+
+    def start_at(w):
+        # Every variant starts with fresh capital on the first out-of-sample
+        # day, so the kill switch and all metrics refer to the same window.
+        w2 = w.copy()
+        w2[w2.index < oos] = np.nan
+        first = int(np.argmax(w2.index >= oos))
+        w2.iloc[first] = w.ffill().iloc[first].to_numpy()
+        return w2
+
+    variants = {"benchmark_buy_hold": bt(start_at(w_bench), kill=False),
+                "stable_only": bt(start_at(w_stable)), "active_only": bt(start_at(w_active))}
     for a in cfg["allocations"]:
         rule = a["rule"]
         label = f"{rule}_{int(a.get('stable_share', 0.8) * 100)}" if rule == "fixed" else rule
         frac_s = allocation_series(rule, close.index, active_alone.returns, **{k: v for k, v in a.items() if k != "rule"})
-        variants[f"blend_{label}"] = bt(combine_sleeves(w_stable, w_active, frac_s))
+        variants[f"blend_{label}"] = bt(start_at(combine_sleeves(w_stable, w_active, frac_s)))
 
     bench_r = slice_result(variants["benchmark_buy_hold"], oos).returns
     rows, equity = {}, {}
@@ -113,7 +130,7 @@ def run_config(cfg: dict, use_holdout: bool = False, results_dir: Path = RESULTS
     meta = {"run_id": run_id, "family": name, "git_commit": git_commit(),
             "data_fingerprint": D.fingerprint(close), "used_holdout": use_holdout,
             "oos_start": str(oos.date()), "data_end": str(close.index[-1].date()),
-            "walk_forward_folds": wf["folds"], "config": cfg}
+            "walk_forward_folds": wf["folds"], "data_fixes": quality_log, "config": cfg}
     with log.open("a") as f:
         for label, m in rows.items():
             f.write(json.dumps({"run_id": run_id, "family": name, "variant": label,
@@ -158,12 +175,17 @@ def render_report(cfg: dict, meta: dict, rows: dict) -> str:
         "| train | test | chosen params | train Sharpe |\n|---|---|---|---|",
         *[f"| {f['train']} | {f['test']} | `{f['chosen']}` | {f['train_sharpe']} |" for f in meta["walk_forward_folds"]],
         "",
+        "## Data fixes applied",
+        "",
+        *([f"- {q}" for q in meta["data_fixes"]] or ["- none"]),
+        "",
         "## How to read this",
         "",
         "- `dsr` (Deflated Sharpe Ratio) is the probability the Sharpe is real after accounting for "
         "how many variants were tried. Promotion gate needs > 0.95.",
         "- `cost_drag_pct_of_capital_per_year` is fees and slippage as a share of starting capital.",
-        "- `excess_cagr` is versus simply holding the benchmark.",
+        "- `excess_cagr` is versus simply holding the benchmark (benchmark has no kill switch).",
+        "- `killed_on`: date the $-loss kill switch fired and the variant went to cash for good.",
     ]
     return "\n".join(lines) + "\n"
 

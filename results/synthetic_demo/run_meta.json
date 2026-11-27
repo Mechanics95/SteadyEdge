@@ -1,7 +1,7 @@
 {
-  "run_id": "20261127T051628Z-a37a04",
+  "run_id": "20261127T053114Z-ba69b4",
   "family": "synthetic_demo",
-  "git_commit": "4524499",
+  "git_commit": "7ac48d0",
   "data_fingerprint": "d071ac2e991f",
   "used_holdout": false,
   "oos_start": "2013-01-11",
@@ -80,6 +80,7 @@
       "train_sharpe": 0.099
     }
   ],
+  "data_fixes": [],
   "config": {
     "name": "synthetic_demo",
     "data": "synthetic",

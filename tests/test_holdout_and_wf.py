@@ -35,3 +35,15 @@ def test_walk_forward_choice_ignores_future():
     wf2 = walk_forward(mk, open_=o2, close=c2, **args)
     assert wf1["folds"][0]["chosen"] == wf2["folds"][0]["chosen"]
     assert wf1["n_trials"] == 4
+
+
+def test_unadjusted_split_is_repaired():
+    from steadyedge.quality import fix_unadjusted_splits
+    b = synthetic(n_assets=2, years=2, seed=5)
+    o, c = b["open"].copy(), b["close"].copy()
+    k = 300
+    c.iloc[k:, 0] /= 10
+    o.iloc[k:, 0] /= 10
+    o2, c2, log = fix_unadjusted_splits(o, c)
+    assert len(log) == 1 and "1:10" in log[0]
+    assert abs(c2.iloc[k, 0] / c2.iloc[k - 1, 0] - b["close"].iloc[k, 0] / b["close"].iloc[k - 1, 0]) < 1e-9
