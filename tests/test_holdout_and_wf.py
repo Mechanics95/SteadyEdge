@@ -45,5 +45,5 @@ def test_unadjusted_split_is_repaired():
     c.iloc[k:, 0] /= 10
     o.iloc[k:, 0] /= 10
     o2, c2, log = fix_unadjusted_splits(o, c)
-    assert len(log) == 1 and "1:10" in log[0]
+    assert len(log) == 1 and "factor of 10" in log[0]
     assert abs(c2.iloc[k, 0] / c2.iloc[k - 1, 0] - b["close"].iloc[k, 0] / b["close"].iloc[k - 1, 0]) < 1e-9

@@ -39,5 +39,6 @@ def fix_unadjusted_splits(open_: pd.DataFrame, close: pd.DataFrame, min_jump: fl
             close.loc[before, t] *= factor
             # The open on the jump day already trades at the new unit.
             open_.loc[before, t] *= factor
-            log.append(f"{t} {d.date()}: unadjusted {'split' if k > 0 else 'reverse split'} 1:{abs(k)} detected; earlier prices adjusted")
+            log.append(f"{t} {d.date()}: one-day price-unit jump {'down' if k > 0 else 'up'} by a factor of {abs(k)} "
+                       "(missing split adjustment or bad print); earlier prices rescaled to match")
     return open_, close, log
