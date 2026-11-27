@@ -1,8 +1,8 @@
 """CLI.
 
-    python -m tradelab download --config configs/us_sleeves.yaml
-    python -m tradelab run --config configs/us_sleeves.yaml
-    python -m tradelab run --config configs/us_sleeves.yaml --final-holdout   # one shot only
+    python -m steadyedge download --config configs/us_sleeves.yaml
+    python -m steadyedge run --config configs/us_sleeves.yaml
+    python -m steadyedge run --config configs/us_sleeves.yaml --final-holdout   # one shot only
 """
 import argparse
 import json
@@ -12,7 +12,7 @@ from .experiment import load_config, run_config
 
 
 def main() -> None:
-    p = argparse.ArgumentParser(prog="tradelab")
+    p = argparse.ArgumentParser(prog="steadyedge")
     sub = p.add_subparsers(dest="cmd", required=True)
     for c in ("download", "run"):
         s = sub.add_parser(c)

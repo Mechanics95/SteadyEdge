@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 import pytest
-from tradelab.costs import IndiaDeliveryCosts, ZeroCosts
-from tradelab.engine import run_backtest
+from steadyedge.costs import IndiaDeliveryCosts, ZeroCosts
+from steadyedge.engine import run_backtest
 
 
 def _bars(n=10, open_px=None, close_px=None):

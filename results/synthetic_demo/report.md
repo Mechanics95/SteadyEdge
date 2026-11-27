@@ -2,7 +2,7 @@
 
 > Research output, not financial advice. Backtests are simulations on past data and do not guarantee future results. **This run uses SYNTHETIC random data: it tests the code, and says nothing about real markets.**
 
-- Run: `20261127T050835Z-7df479` · commit `uncommitted` · data `d071ac2e991f`
+- Run: `20261127T051628Z-a37a04` · commit `4524499` · data `d071ac2e991f`
 - Out-of-sample window: 2013-01-11 to 2020-05-29 (walk-forward; holdout sealed from 2020-06-01)
 - Capital $500, kill switch at $250 loss, fractional shares, costs: us model
 - Trials counted for this family so far: 12

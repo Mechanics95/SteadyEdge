@@ -4,8 +4,8 @@ deliberately cheating strategy to prove the detector works."""
 import numpy as np
 import pandas as pd
 import pytest
-from tradelab.data import synthetic
-from tradelab.strategies import buy_and_hold, momentum, rsi_reversion, trend_filter
+from steadyedge.data import synthetic
+from steadyedge.strategies import buy_and_hold, momentum, rsi_reversion, trend_filter
 
 CLOSE = synthetic(n_assets=5, years=4, seed=3)["close"]
 CUTS = [300, 517, 700, 901]

@@ -1,9 +1,9 @@
 import pandas as pd
 import pytest
-from tradelab.costs import ZeroCosts
-from tradelab.data import HoldoutLocked, apply_holdout, synthetic
-from tradelab.portfolio import walk_forward
-from tradelab.strategies import momentum
+from steadyedge.costs import ZeroCosts
+from steadyedge.data import HoldoutLocked, apply_holdout, synthetic
+from steadyedge.portfolio import walk_forward
+from steadyedge.strategies import momentum
 
 
 def test_holdout_is_cut_by_default(tmp_path):

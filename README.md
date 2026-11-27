@@ -1,4 +1,4 @@
-# tradelab
+# SteadyEdge
 
 Research-first backtesting and experiment framework for **US and Indian equities**.
 It replays strategies on historical daily data with realistic costs, tests how to split
@@ -17,12 +17,12 @@ honest record of every experiment so results can't be cherry-picked.
 
 | Piece | Where | What it does |
 |---|---|---|
-| Engine | `tradelab/engine.py` | Daily simulation. Signals decided at close *t* execute at the **open of t+1**. Long-only, no leverage, whole or fractional shares, absolute-loss kill switch. |
-| Costs | `tradelab/costs.py` | US (zero-commission broker + spread/slippage + SEC/FINRA fees) and India delivery (STT, exchange, SEBI, stamp duty, GST, DP charge, slippage). |
-| Strategies | `tradelab/strategies.py` | Baselines: buy-and-hold, trend filter, cross-sectional momentum, RSI mean reversion. |
-| Sleeves | `tradelab/portfolio.py` | Combines stable + active sleeves in one account; allocation rules: fixed split, volatility target, drawdown throttle. Walk-forward parameter selection. |
-| Metrics | `tradelab/metrics.py` | CAGR, vol, Sharpe, Sortino, max drawdown, worst 12 months, turnover, cost drag, alpha/beta, **Probabilistic and Deflated Sharpe**. |
-| Experiments | `tradelab/experiment.py` | One YAML = one experiment family. Every variant is appended to `results/runs.jsonl` with git commit and data fingerprint. Writes `results/<name>/report.md`. |
+| Engine | `steadyedge/engine.py` | Daily simulation. Signals decided at close *t* execute at the **open of t+1**. Long-only, no leverage, whole or fractional shares, absolute-loss kill switch. |
+| Costs | `steadyedge/costs.py` | US (zero-commission broker + spread/slippage + SEC/FINRA fees) and India delivery (STT, exchange, SEBI, stamp duty, GST, DP charge, slippage). |
+| Strategies | `steadyedge/strategies.py` | Baselines: buy-and-hold, trend filter, cross-sectional momentum, RSI mean reversion. |
+| Sleeves | `steadyedge/portfolio.py` | Combines stable + active sleeves in one account; allocation rules: fixed split, volatility target, drawdown throttle. Walk-forward parameter selection. |
+| Metrics | `steadyedge/metrics.py` | CAGR, vol, Sharpe, Sortino, max drawdown, worst 12 months, turnover, cost drag, alpha/beta, **Probabilistic and Deflated Sharpe**. |
+| Experiments | `steadyedge/experiment.py` | One YAML = one experiment family. Every variant is appended to `results/runs.jsonl` with git commit and data fingerprint. Writes `results/<name>/report.md`. |
 | Guards | `tests/` | Lookahead detector run on every strategy, holdout lock, walk-forward isolation, cost arithmetic, engine timing. |
 
 ## Quick start
@@ -30,11 +30,11 @@ honest record of every experiment so results can't be cherry-picked.
 ```bash
 pip install -e ".[data,dev]"
 pytest -q                                              # proofs the machinery works
-python -m tradelab run --config configs/synthetic_demo.yaml   # offline code check (random data)
-python -m tradelab download --config configs/us_sleeves.yaml   # free daily data via yfinance
-python -m tradelab run --config configs/us_sleeves.yaml
-python -m tradelab download --config configs/india_sleeves.yaml
-python -m tradelab run --config configs/india_sleeves.yaml
+python -m steadyedge run --config configs/synthetic_demo.yaml   # offline code check (random data)
+python -m steadyedge download --config configs/us_sleeves.yaml   # free daily data via yfinance
+python -m steadyedge run --config configs/us_sleeves.yaml
+python -m steadyedge download --config configs/india_sleeves.yaml
+python -m steadyedge run --config configs/india_sleeves.yaml
 ```
 
 The **holdout** (from 2025-01-01 by default) is sealed. `--final-holdout` opens it, and the

@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import pytest
-from tradelab.metrics import deflated_sharpe, max_drawdown, probabilistic_sharpe, sharpe
+from steadyedge.metrics import deflated_sharpe, max_drawdown, probabilistic_sharpe, sharpe
 
 
 def test_max_drawdown():

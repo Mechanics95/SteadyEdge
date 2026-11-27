@@ -1,5 +1,5 @@
 [project]
-name = "tradelab"
+name = "steadyedge"
 version = "0.1.0"
 description = "Research-only backtesting and experiment framework for US and Indian equities. Not financial advice."
 requires-python = ">=3.10"
@@ -18,4 +18,4 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["tradelab"]
+packages = ["steadyedge"]

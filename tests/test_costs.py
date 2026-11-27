@@ -1,5 +1,5 @@
 import pytest
-from tradelab.costs import IndiaDeliveryCosts, USCosts
+from steadyedge.costs import IndiaDeliveryCosts, USCosts
 
 
 def test_india_delivery_buy_10k():

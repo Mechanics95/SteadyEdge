@@ -1,7 +1,7 @@
 {
-  "run_id": "20261127T050835Z-7df479",
+  "run_id": "20261127T051628Z-a37a04",
   "family": "synthetic_demo",
-  "git_commit": "uncommitted",
+  "git_commit": "4524499",
   "data_fingerprint": "d071ac2e991f",
   "used_holdout": false,
   "oos_start": "2013-01-11",

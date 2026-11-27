@@ -16,8 +16,8 @@ jobs:
         with: {python-version: "3.12"}
       - run: pip install -e ".[data,dev]"
       - run: pytest -q
-      - run: python -m tradelab download --config ${{ matrix.config }}
-      - run: python -m tradelab run --config ${{ matrix.config }}
+      - run: python -m steadyedge download --config ${{ matrix.config }}
+      - run: python -m steadyedge run --config ${{ matrix.config }}
       - uses: actions/upload-artifact@v4
         with:
           name: results-${{ strategy.job-index }}

@@ -49,7 +49,7 @@ def load(tickers: list[str], market: str) -> dict[str, pd.DataFrame]:
     for t in tickers:
         p = DATA_DIR / market / f"{t}.csv.gz"
         if not p.exists():
-            raise FileNotFoundError(f"{p} missing; run: python -m tradelab download --config <cfg>")
+            raise FileNotFoundError(f"{p} missing; run: python -m steadyedge download --config <cfg>")
         frames[t] = pd.read_csv(p, index_col=0, parse_dates=True)
     open_ = pd.DataFrame({t: f["Open"] for t, f in frames.items()}).sort_index()
     close = pd.DataFrame({t: f["Close"] for t, f in frames.items()}).sort_index()
