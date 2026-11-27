@@ -47,3 +47,11 @@ def test_unadjusted_split_is_repaired():
     o2, c2, log = fix_unadjusted_splits(o, c)
     assert len(log) == 1 and "factor of 10" in log[0]
     assert abs(c2.iloc[k, 0] / c2.iloc[k - 1, 0] - b["close"].iloc[k, 0] / b["close"].iloc[k - 1, 0]) < 1e-9
+
+
+def test_holdout_lock_is_per_market(tmp_path):
+    bars, log = synthetic(years=5), tmp_path / "h.json"
+    apply_holdout(bars, "2011-01-01", True, "us_v2", log, scope="us")
+    apply_holdout(bars, "2011-01-01", True, "india_v2", log, scope="india")   # other market: ok
+    with pytest.raises(HoldoutLocked):
+        apply_holdout(bars, "2011-01-01", True, "us_v3", log, scope="us")

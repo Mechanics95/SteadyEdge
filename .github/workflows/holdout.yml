@@ -1,0 +1,32 @@
+name: sealed-holdout-check
+# One-shot final exam on data from holdout_start onward. The code refuses to
+# open the same holdout for a different candidate in the same market.
+on:
+  workflow_dispatch:
+    inputs:
+      configs:
+        description: "space-separated config paths"
+        default: "configs/us_trend_v2.yaml configs/india_trend_v2.yaml"
+permissions:
+  contents: write
+concurrency: {group: research, cancel-in-progress: false}
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install -e ".[data,ml,dev]"
+      - run: |
+          for cfg in ${{ inputs.configs }}; do
+            python -m steadyedge download --config "$cfg"
+            python -m steadyedge run --config "$cfg" --final-holdout
+          done
+      - run: python scripts/build_site.py
+      - run: |
+          git config user.name "steadyedge-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add results/ site/
+          git commit -m "Sealed holdout check $(date -u +%Y-%m-%d)" || echo "nothing to commit"
+          git pull --rebase && git push

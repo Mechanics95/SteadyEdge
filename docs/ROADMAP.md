@@ -7,4 +7,4 @@
 - [ ] **1c. ML active sleeve**: feature pipeline, purged/embargoed CV, LightGBM ranking, compared to momentum.
 - [ ] **1d. Agentic research (optional)**: LLM agents tested only after their training cutoff or forward.
 - [ ] **Gate**: `docs/PROMOTION_GATE.md`.
-- [ ] **Phase 2**: paper trading with daily refit and trade journal (Alpaca paper for US; India manual or broker API).
+- [x] **Phase 2 (started 2026-11-27)**: simulated paper trading of v2 80/20, daily in GitHub Actions. Broker paper account (Alpaca) pending approval.

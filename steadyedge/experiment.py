@@ -62,7 +62,8 @@ def run_config(cfg: dict, use_holdout: bool = False, results_dir: Path = RESULTS
         tickers = sorted(set(cfg["universe"]) | {cfg["benchmark"]})
         bars = D.load(tickers, cfg["market"])
     bars = {k: v.loc[v.index >= pd.Timestamp(cfg.get("start", "1900-01-01"))] for k, v in bars.items()}
-    bars = D.apply_holdout(bars, cfg.get("holdout_start"), use_holdout, name)
+    bars = D.apply_holdout(bars, cfg.get("holdout_start"), use_holdout, name,
+                           scope=cfg.get("family", cfg["market"]))
     open_, close = bars["open"], bars["close"]
     quality_log = []
     if cfg.get("data") != "synthetic":
@@ -82,6 +83,12 @@ def run_config(cfg: dict, use_holdout: bool = False, results_dir: Path = RESULTS
     if not wf["folds"]:
         raise ValueError("not enough history for one walk-forward fold")
     oos = pd.Timestamp(wf["oos_start"])
+    if use_holdout:
+        # Final exam: score ONLY the sealed period. Parameters are still picked
+        # by walk-forward from earlier data, exactly as they would be live.
+        oos = pd.Timestamp(cfg["holdout_start"])
+        name = f"{name}_holdout"
+        cfg = {**cfg, "title": cfg.get("title", name) + " (sealed 2025+ check)"}
     w_active = wf["weights"]
     w_stable = _weights(cfg["stable"], close)
     w_bench = STRATEGIES["buy_and_hold"](close, weights={cfg["benchmark"]: 1.0})

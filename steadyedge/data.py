@@ -62,7 +62,7 @@ def fingerprint(close: pd.DataFrame) -> str:
 
 
 def apply_holdout(bars: dict, holdout_start: str | None, use_holdout: bool, run_label: str,
-                  log_path: Path = HOLDOUT_LOG) -> dict:
+                  log_path: Path = HOLDOUT_LOG, scope: str = "default") -> dict:
     """Cut data at holdout_start unless the holdout is deliberately opened.
 
     Opening the holdout is logged, and refused for a second run label: the
@@ -74,11 +74,15 @@ def apply_holdout(bars: dict, holdout_start: str | None, use_holdout: bool, run_
     if not use_holdout:
         return {k: v.loc[v.index < cut] for k, v in bars.items()}
     log = json.loads(log_path.read_text()) if log_path.exists() else []
-    if any(e["holdout_start"] == holdout_start and e["label"] != run_label for e in log):
+    if any(e["holdout_start"] == holdout_start and e.get("scope", "default") == scope
+           and e["label"] != run_label for e in log):
         raise HoldoutLocked(
             f"Holdout from {holdout_start} was already used by {[e['label'] for e in log]}. "
             "Using it again would turn it into a tuning set. Pick a new holdout period instead.")
-    log.append({"label": run_label, "holdout_start": holdout_start,
+    if any(e["holdout_start"] == holdout_start and e.get("scope", "default") == scope
+           and e["label"] == run_label for e in log):
+        return bars
+    log.append({"label": run_label, "scope": scope, "holdout_start": holdout_start,
                 "opened_at": datetime.now(timezone.utc).isoformat()})
     log_path.parent.mkdir(parents=True, exist_ok=True)
     log_path.write_text(json.dumps(log, indent=2))

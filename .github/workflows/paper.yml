@@ -1,0 +1,41 @@
+name: paper-trading
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 22 * * 1-5"   # after US close (India closed hours earlier)
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency: {group: research, cancel-in-progress: false}
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install -e ".[data,ml,dev]"
+      - name: Paper trade (simulated, no broker)
+        run: |
+          python -m steadyedge download --config configs/us_trend_v2.yaml
+          python -m steadyedge.paper --market us --config configs/us_trend_v2.yaml --stable-share 0.8
+          python -m steadyedge download --config configs/india_trend_v2.yaml
+          python -m steadyedge.paper --market india --config configs/india_trend_v2.yaml --stable-share 0.8
+      - run: python scripts/build_site.py
+      - name: Commit ledger and journal
+        run: |
+          git config user.name "steadyedge-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add paper/ site/
+          git commit -m "Paper trading $(date -u +%Y-%m-%d)" || echo "nothing to commit"
+          git pull --rebase && git push
+      - uses: actions/upload-pages-artifact@v3
+        with: {path: site}
+  deploy:
+    needs: run
+    runs-on: ubuntu-latest
+    environment: {name: github-pages, url: "${{ steps.d.outputs.page_url }}"}
+    steps:
+      - id: d
+        uses: actions/deploy-pages@v4

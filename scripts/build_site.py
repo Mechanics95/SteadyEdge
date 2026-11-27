@@ -27,7 +27,7 @@ def discover() -> list[tuple[str, str, str]]:
             continue
         cur = "$" if cfg["market"] == "us" else "Rs "
         out.append((d.parent.name, cfg.get("title", d.parent.name), cur, cfg["market"]))
-    out.sort(key=lambda x: (x[3] != "us", x[0]))
+    out.sort(key=lambda x: (x[3] != "us", x[1]))
     return [(a, b, c) for a, b, c, _ in out]
 CHART_SERIES = [("benchmark_buy_hold", "Index (buy and hold)"),
                 ("active_only", "Active sleeve only"),
@@ -209,15 +209,48 @@ for(const [id,c] of Object.entries(DATA)) draw('chart-'+id,c);
 </script></body></html>"""
 
 
+def paper_section() -> tuple[str, dict]:
+    root = ROOT / "paper"
+    parts, data = [], {}
+    for m, title, cur in (("us", "United States", "$"), ("india", "India", "Rs ")):
+        meta_p = root / m / "paper_meta.json"
+        if not meta_p.exists():
+            continue
+        meta = json.loads(meta_p.read_text())
+        last = meta["last_run"]
+        led = pd.read_csv(root / m / "ledger.csv", index_col=0, parse_dates=True)
+        data[f"paper-{m}"] = {"dates": [str(x.date()) for x in led.index], "cur": cur, "series": [
+            {"name": "Index (buy and hold)", "values": led["index_hold"].round(2).tolist()},
+            {"name": "SteadyEdge v2 80/20 (paper)", "values": led["equity"].round(2).tolist()}]}
+        pos = pd.read_csv(root / m / "positions.csv", index_col=0)
+        pos_html = "".join(f"<tr><td>{html.escape(str(t))}</td><td>{r.shares:.4g}</td><td>{cur}{r.value:,.2f}</td></tr>"
+                           for t, r in pos.iterrows()) or "<tr><td colspan=3>cash only</td></tr>"
+        parts.append(f"""
+  <h3>{title}: {cur}{last['equity']:,.2f} ({last['return_since_start']:+.2%})
+  vs index {cur}{last['index_hold']:,.2f} ({last['index_return_since_start']:+.2%})</h3>
+  <p class="muted">Started {meta['start']} with {cur}{meta['capital']:,} · last update {last['date']} ·
+  latest decision: {last['action']}{' · KILL SWITCH FIRED ' + last['killed_on'] if last.get('killed_on') else ''}</p>
+  <div class="chart" id="chart-paper-{m}" role="img" aria-label="Paper trading equity, {title}"></div>
+  <details><summary>Current positions</summary><table><thead><tr><th>Ticker</th><th>Shares</th><th>Value</th></tr></thead>
+  <tbody>{pos_html}</tbody></table></details>""")
+    if not parts:
+        return "", {}
+    return ("<section><h2 id='paper'>Paper trading (live forward test, simulated)</h2>"
+            "<p>Every trading day the strategy's decision is frozen in the repository before the next day's "
+            "prices exist, then replayed with the same costs. No real money and no broker. "
+            "Daily notes are in <code>paper/&lt;market&gt;/journal.md</code>.</p>" + "".join(parts) + "</section>"), data
+
+
 def main() -> None:
-    sections, data = [], {}
+    psec, data = paper_section()
+    sections = [psec] if psec else []
     for name, title, cur in discover():
         s, c = market_section(name, title, cur)
         sections.append(s)
         if c:
             data[name] = c
     updated = pd.Timestamp.now(tz="UTC").strftime("%Y-%m-%d %H:%M UTC")
-    toc = "<nav><strong>Experiments:</strong> " + " · ".join(
+    toc = "<nav><a href='#paper'>Paper trading</a> · <strong>Experiments:</strong> " + " · ".join(
         f"<a href='#{n}'>{html.escape(t)}</a>" for n, t, _ in discover()) + "</nav>"
     page = PAGE.replace("__TOC__", toc).replace("__SECTIONS__", "\n".join(sections)) \
                .replace("__DATA__", json.dumps(data)).replace("__UPDATED__", updated)
