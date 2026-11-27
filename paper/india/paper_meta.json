@@ -1,0 +1,24 @@
+{
+  "market": "india",
+  "config": "configs/india_trend_v2.yaml",
+  "stable_share": 0.8,
+  "start": "2026-11-27",
+  "capital": 44000,
+  "max_loss": 22000,
+  "created_at": "2026-11-27T06:23:39.584233+00:00",
+  "last_run": {
+    "date": "2026-11-27",
+    "equity": 44000.0,
+    "index_hold": 44000.0,
+    "return_since_start": 0.0,
+    "index_return_since_start": 0.0,
+    "day_pnl": 0.0,
+    "action": "rebalance",
+    "active_params": {
+      "lookback": 252,
+      "top_n": 4
+    },
+    "killed_on": null,
+    "data_fixes": []
+  }
+}
