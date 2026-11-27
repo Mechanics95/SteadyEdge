@@ -1,0 +1,14 @@
+[
+  {
+    "label": "us_trend_v2",
+    "scope": "us",
+    "holdout_start": "2025-01-01",
+    "opened_at": "2026-11-27T06:12:42.723276+00:00"
+  },
+  {
+    "label": "india_trend_v2",
+    "scope": "india",
+    "holdout_start": "2025-01-01",
+    "opened_at": "2026-11-27T06:12:57.111854+00:00"
+  }
+]
