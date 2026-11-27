@@ -31,7 +31,7 @@ jobs:
         run: |
           git config user.name "steadyedge-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add results/ site/
+          git add results/
           git commit -m "Research run $(date -u +%Y-%m-%dT%H:%MZ)" || echo "nothing to commit"
           git pull --rebase && git push
       - uses: actions/upload-pages-artifact@v3

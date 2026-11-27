@@ -27,7 +27,7 @@ jobs:
         run: |
           git config user.name "steadyedge-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add paper/ site/
+          git add paper/
           git commit -m "Paper trading $(date -u +%Y-%m-%d)" || echo "nothing to commit"
           git pull --rebase && git push
       - uses: actions/upload-pages-artifact@v3
