@@ -246,7 +246,8 @@ def leaderboard() -> str:
 def paper_section() -> tuple[str, dict]:
     root = ROOT / "paper"
     parts, data = [], {}
-    for m, title, cur in (("us", "United States", "$"), ("india", "India", "Rs ")):
+    for m, title, cur in (("us", "United States (v2 80/20)", "$"), ("india", "India (v2 80/20)", "Rs "),
+                          ("india_v4", "India (v4 80/20, added 2026-11-28)", "Rs ")):
         meta_p = root / m / "paper_meta.json"
         if not meta_p.exists():
             continue
@@ -255,7 +256,7 @@ def paper_section() -> tuple[str, dict]:
         led = pd.read_csv(root / m / "ledger.csv", index_col=0, parse_dates=True)
         data[f"paper-{m}"] = {"dates": [str(x.date()) for x in led.index], "cur": cur, "series": [
             {"name": "Index (buy and hold)", "values": led["index_hold"].round(2).tolist()},
-            {"name": "SteadyEdge v2 80/20 (paper)", "values": led["equity"].round(2).tolist()}]}
+            {"name": "SteadyEdge (paper)", "values": led["equity"].round(2).tolist()}]}
         pos = pd.read_csv(root / m / "positions.csv", index_col=0)
         pos_html = "".join(f"<tr><td>{html.escape(str(t))}</td><td>{r.shares:.4g}</td><td>{cur}{r.value:,.2f}</td></tr>"
                            for t, r in pos.iterrows()) or "<tr><td colspan=3>cash only</td></tr>"

@@ -22,6 +22,8 @@ jobs:
           python -m steadyedge.paper --market us --config configs/us_trend_v2.yaml --stable-share 0.8
           python -m steadyedge download --config configs/india_trend_v2.yaml
           python -m steadyedge.paper --market india --config configs/india_trend_v2.yaml --stable-share 0.8
+          python -m steadyedge download --config configs/india_buffer_v4.yaml
+          python -m steadyedge.paper --market india_v4 --config configs/india_buffer_v4.yaml --stable-share 0.8
       - run: python scripts/build_site.py
       - name: Commit ledger and journal
         run: |
