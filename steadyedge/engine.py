@@ -36,6 +36,7 @@ def run_backtest(
     initial_capital: float,
     fractional: bool = False,
     max_loss: float | None = None,
+    min_trade_frac: float = 0.0,
 ) -> BacktestResult:
     """Simulate a long-only, unlevered portfolio.
 
@@ -74,6 +75,11 @@ def run_backtest(
             if not fractional:
                 target_sh = np.where(tradable, np.floor(target_sh + 1e-9), shares)
             delta = target_sh - shares
+            if min_trade_frac > 0:
+                # No-trade band: skip small resizing trades (each costs fixed
+                # fees like India's DP charge). Full exits always go through.
+                small = (np.abs(delta * np.nan_to_num(px_open)) < min_trade_frac * value) & (target_sh > 0)
+                delta = np.where(small, 0.0, delta)
 
             # Sells first, to free cash.
             for j in np.where(delta < -1e-12)[0]:
@@ -142,5 +148,6 @@ def run_backtest(
         turnover=pd.Series(turn_day, index=dates, name="turnover"),
         holdings=pd.DataFrame(hold_rows, index=dates, columns=tickers),
         killed_on=killed_on,
-        meta={"initial_capital": initial_capital, "fractional": fractional, "max_loss": max_loss},
+        meta={"initial_capital": initial_capital, "fractional": fractional, "max_loss": max_loss,
+              "min_trade_frac": min_trade_frac},
     )

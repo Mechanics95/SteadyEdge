@@ -59,7 +59,7 @@ def run_config(cfg: dict, use_holdout: bool = False, results_dir: Path = RESULTS
     if cfg.get("data") == "synthetic":
         bars = D.synthetic(**cfg.get("synthetic", {}))
     else:
-        tickers = sorted(set(cfg["universe"]) | {cfg["benchmark"]})
+        tickers = sorted(set(cfg["universe"]) | {cfg["benchmark"]} | set(cfg.get("context", [])))
         bars = D.load(tickers, cfg["market"])
     bars = {k: v.loc[v.index >= pd.Timestamp(cfg.get("start", "1900-01-01"))] for k, v in bars.items()}
     bars = D.apply_holdout(bars, cfg.get("holdout_start"), use_holdout, name,
@@ -70,16 +70,17 @@ def run_config(cfg: dict, use_holdout: bool = False, results_dir: Path = RESULTS
         open_, close, quality_log = fix_unadjusted_splits(open_, close)
     cost = make_cost_model(cfg["market"], cfg.get("cost_overrides"))
     cap, frac, max_loss = cfg["capital"], cfg.get("fractional", False), cfg.get("max_loss")
+    band = cfg.get("min_trade_frac", 0.0)
 
     def bt(w, kill=True):
-        return run_backtest(open_, close, w, cost, cap, frac, max_loss if kill else None)
+        return run_backtest(open_, close, w, cost, cap, frac, max_loss if kill else None, band)
 
     # Active sleeve: walk-forward over its parameter grid.
     act = cfg["active"]
     base_params = act.get("params", {})
     wf = walk_forward(lambda c, **p: STRATEGIES[act["strategy"]](c, **{**base_params, **p}),
                       act["grid"], open_, close, cost, cap, frac,
-                      cfg.get("train_years", 5), cfg.get("test_years", 1))
+                      cfg.get("train_years", 5), cfg.get("test_years", 1), min_trade_frac=band)
     if not wf["folds"]:
         raise ValueError("not enough history for one walk-forward fold")
     oos = pd.Timestamp(wf["oos_start"])
@@ -128,8 +129,12 @@ def run_config(cfg: dict, use_holdout: bool = False, results_dir: Path = RESULTS
     log = results_dir / "runs.jsonl"
     past = [json.loads(l) for l in log.read_text().splitlines()] if log.exists() else []
     family = cfg.get("family", name)
+    # A config already in the log is a re-run (fresh data), not a new idea:
+    # it is not counted again. Rule: never edit a config after its first run;
+    # a new idea gets a new name. Holdout runs are logged but not re-counted.
+    seen = any(p.get("config", p["family"]) == name.removesuffix("_holdout") for p in past)
     past_sr = [p["metrics"]["sharpe"] for p in past if p["family"] == family]
-    new_sr = [m["sharpe"] for m in rows.values()] + wf["trial_sharpes"]
+    new_sr = [] if seen else [m["sharpe"] for m in rows.values()] + wf["trial_sharpes"]
     all_sr = np.array(past_sr + new_sr) / np.sqrt(TRADING_DAYS)
     adj_path = results_dir / "trial_adjustments.json"
     untracked = json.loads(adj_path.read_text()).get(family, 0) if adj_path.exists() else 0
@@ -149,17 +154,18 @@ def run_config(cfg: dict, use_holdout: bool = False, results_dir: Path = RESULTS
             "data_fingerprint": D.fingerprint(close), "used_holdout": use_holdout,
             "oos_start": str(oos.date()), "data_end": str(close.index[-1].date()),
             "walk_forward_folds": wf["folds"], "data_fixes": quality_log, "config": cfg}
-    with log.open("a") as f:
-        for label, m in rows.items():
-            f.write(json.dumps({"run_id": run_id, "family": family, "config": name, "variant": label,
-                                "time": meta["run_id"][:16], "git_commit": meta["git_commit"],
-                                "data_fingerprint": meta["data_fingerprint"],
-                                "used_holdout": use_holdout, "metrics": m}) + "\n")
-        # Walk-forward grid candidates are trials too.
-        for i, sr in enumerate(wf["trial_sharpes"]):
-            f.write(json.dumps({"run_id": run_id, "family": family, "config": name, "variant": f"grid_{i}",
-                                "time": meta["run_id"][:16], "used_holdout": use_holdout,
-                                "metrics": {"sharpe": round(sr, 3)}}) + "\n")
+    if not seen:
+        with log.open("a") as f:
+            for label, m in rows.items():
+                f.write(json.dumps({"run_id": run_id, "family": family, "config": name, "variant": label,
+                                    "time": meta["run_id"][:16], "git_commit": meta["git_commit"],
+                                    "data_fingerprint": meta["data_fingerprint"],
+                                    "used_holdout": use_holdout, "metrics": m}) + "\n")
+            # Walk-forward grid candidates are trials too.
+            for i, sr in enumerate(wf["trial_sharpes"]):
+                f.write(json.dumps({"run_id": run_id, "family": family, "config": name, "variant": f"grid_{i}",
+                                    "time": meta["run_id"][:16], "used_holdout": use_holdout,
+                                    "metrics": {"sharpe": round(sr, 3)}}) + "\n")
 
     out = results_dir / name
     out.mkdir(parents=True, exist_ok=True)

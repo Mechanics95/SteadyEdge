@@ -60,7 +60,7 @@ def grid(param_grid: dict) -> list[dict]:
 
 def walk_forward(make_weights, param_grid: dict, open_: pd.DataFrame, close: pd.DataFrame,
                  cost_model, capital: float, fractional: bool, train_years: int = 5,
-                 test_years: int = 1, warmup_days: int = 260) -> dict:
+                 test_years: int = 1, warmup_days: int = 260, min_trade_frac: float = 0.0) -> dict:
     """Rolling walk-forward. For each test window, pick the params with the
     best Sharpe on the preceding train window only, then trade the test
     window with them. Returns stitched out-of-sample weights plus the log of
@@ -69,7 +69,8 @@ def walk_forward(make_weights, param_grid: dict, open_: pd.DataFrame, close: pd.
     all_w = {i: make_weights(close, **p) for i, p in enumerate(combos)}
     # Each combo's full-history run; slicing a run by date is safe because the
     # strategies are causal (verified by tests/test_lookahead.py).
-    runs = {i: run_backtest(open_, close, w, cost_model, capital, fractional).returns
+    runs = {i: run_backtest(open_, close, w, cost_model, capital, fractional,
+                            min_trade_frac=min_trade_frac).returns
             for i, w in all_w.items()}
     idx = close.index
     start = idx[0] + pd.Timedelta(days=int(warmup_days * 365 / 252))

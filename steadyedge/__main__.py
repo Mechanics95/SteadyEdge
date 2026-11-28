@@ -23,7 +23,7 @@ def main() -> None:
     a = p.parse_args()
     cfg = load_config(a.config)
     if a.cmd == "download":
-        D.download(sorted(set(cfg["universe"]) | {cfg["benchmark"]}), cfg["market"], cfg.get("download_start", "2005-01-01"))
+        D.download(sorted(set(cfg["universe"]) | {cfg["benchmark"]} | set(cfg.get("context", []))), cfg["market"], cfg.get("download_start", "2005-01-01"))
     else:
         out = run_config(cfg, use_holdout=a.final_holdout)
         print(json.dumps(out["metrics"], indent=2))

@@ -53,6 +53,11 @@ def load(tickers: list[str], market: str) -> dict[str, pd.DataFrame]:
         frames[t] = pd.read_csv(p, index_col=0, parse_dates=True)
     open_ = pd.DataFrame({t: f["Open"] for t, f in frames.items()}).sort_index()
     close = pd.DataFrame({t: f["Close"] for t, f in frames.items()}).sort_index()
+    # Trading calendar = days when at least one tradable (non-index) ticker
+    # traded. Context series (^VIX, yields) keep a different calendar.
+    tradable = [t for t in close.columns if not t.startswith("^")]
+    keep = close[tradable].notna().any(axis=1)
+    open_, close = open_.loc[keep], close.loc[keep]
     return {"open": open_, "close": close}
 
 

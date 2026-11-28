@@ -35,7 +35,8 @@ def target_weights(cfg: dict, open_: pd.DataFrame, close: pd.DataFrame, stable_s
     base = act.get("params", {})
     wf = walk_forward(lambda c, **p: STRATEGIES[act["strategy"]](c, **{**base, **p}), act["grid"],
                       open_, close, cost, cfg["capital"], cfg.get("fractional", False),
-                      cfg.get("train_years", 5), cfg.get("test_years", 1))
+                      cfg.get("train_years", 5), cfg.get("test_years", 1),
+                      min_trade_frac=cfg.get("min_trade_frac", 0.0))
     w_stable = STRATEGIES[cfg["stable"]["strategy"]](close, **cfg["stable"].get("params", {}))
     frac = allocation_series("fixed", close.index, stable_share=stable_share)
     return combine_sleeves(w_stable, wf["weights"], frac), wf["folds"][-1]["chosen"]
@@ -45,9 +46,12 @@ def run_paper(market: str, config_path: str, stable_share: float = 0.8, out_root
               bars: dict | None = None) -> dict:
     cfg = load_config(config_path)
     if bars is None:
-        tickers = sorted(set(cfg["universe"]) | {cfg["benchmark"]})
+        tickers = sorted(set(cfg["universe"]) | {cfg["benchmark"]} | set(cfg.get("context", [])))
         bars = D.load(tickers, cfg["market"])   # full history incl. the holdout: this is live use
     open_, close, fixes = fix_unadjusted_splits(bars["open"], bars["close"])
+    # Ignore a trailing partial row (some tickers printed, the benchmark not yet).
+    last_ok = close[cfg["benchmark"]].last_valid_index()
+    open_, close = open_.loc[:last_ok], close.loc[:last_ok]
     w, params = target_weights(cfg, open_, close, stable_share)
     today = close.index[-1]
 
@@ -76,8 +80,10 @@ def run_paper(market: str, config_path: str, stable_share: float = 0.8, out_root
 
     o, c = open_.loc[open_.index >= start], close.loc[close.index >= start]
     cost = make_cost_model(cfg["market"], cfg.get("cost_overrides"))
-    res = run_backtest(o, c, decisions, cost, cfg["capital"], cfg.get("fractional", False), cfg.get("max_loss"))
-    bench = (c[cfg["benchmark"]] / c[cfg["benchmark"]].iloc[0]) * cfg["capital"]
+    res = run_backtest(o, c, decisions, cost, cfg["capital"], cfg.get("fractional", False), cfg.get("max_loss"),
+                       cfg.get("min_trade_frac", 0.0))
+    bpx = c[cfg["benchmark"]].ffill().bfill()   # a missing print on day one must not blank the comparison
+    bench = (bpx / bpx.iloc[0]) * cfg["capital"]
 
     ledger = pd.DataFrame({"equity": res.equity.round(2), "index_hold": bench.round(2),
                            "cost": res.costs.round(2)})

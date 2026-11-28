@@ -1,0 +1,39 @@
+# v5 = v3 + market-wide signals for the ML model, using v4's 3% no-trade band
+# (compare v5 with v4 for ML vs momentum under the same trading rules).
+# Signals:
+# (index trend and volatility, VIX, 10-year and 3-month US yields).
+# v3 = v2 with the active sleeve replaced by a gradient-boosted ranking model
+# (steadyedge/ml.py). v2 note: the stable sleeve leaves the index when it is below its
+# 200-day average (well-known rule, not tuned here) and holds IEF bonds instead.
+# US: stable sleeve = S&P 500 ETF held; active sleeve = momentum across
+# sector / asset-class ETFs (ETFs avoid single-stock survivorship bias).
+name: us_mlctx_v5
+title: "US v5: trend-filtered index + ML ranking with market signals"
+market: us
+family: us   # trial count for Deflated Sharpe is shared by every US experiment
+capital: 500              # USD, Robinhood-style account
+min_trade_frac: 0.03     # no-trade band: skip resizing trades under 3% of equity (exits always allowed)
+fractional: true          # Robinhood supports fractional shares
+max_loss: 250             # kill switch: half of Max's total $500 loss limit
+start: "2007-01-01"
+download_start: "2005-01-01"
+holdout_start: "2025-01-01"   # sealed until a final candidate exists
+benchmark: SPY
+context: ["^VIX", "^TNX", "^IRX"]   # market-wide signals, downloaded but never traded
+universe: [SPY, QQQ, IWM, EFA, EEM, TLT, IEF, GLD,
+           XLK, XLF, XLE, XLV, XLY, XLP, XLI, XLU, XLB]
+stable: {strategy: trend_filter, params: {asset: SPY, window: 200, off_asset: IEF, freq: W}}
+active:
+  strategy: ml_rank
+  params: {market: SPY, context: ["^VIX", "^TNX", "^IRX"], horizon: 21, embargo: 5, train_years: 5, freq: M, universe: [QQQ, IWM, EFA, EEM, TLT, IEF, GLD, XLK, XLF, XLE, XLV, XLY, XLP, XLI, XLU, XLB]}
+  grid: {top_n: [2, 3]}
+train_years: 5
+test_years: 1
+allocations:
+  - {rule: fixed, stable_share: 0.9}
+  - {rule: fixed, stable_share: 0.8}
+  - {rule: fixed, stable_share: 0.7}
+  - {rule: fixed, stable_share: 0.6}
+  - {rule: fixed, stable_share: 0.5}
+  - {rule: vol_target, stable_share: 0.8, target_vol: 0.15, max_active: 0.4}
+  - {rule: drawdown_throttle, stable_share: 0.7, dd_limit: -0.15}

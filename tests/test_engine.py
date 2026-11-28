@@ -69,3 +69,16 @@ def test_costs_reduce_equity():
     w.iloc[0], w.iloc[3] = 1.0, 0.0
     r = run_backtest(o, c, w, IndiaDeliveryCosts(), 100_000, fractional=False)
     assert r.equity.iloc[-1] < 100_000 and r.costs.sum() > 0
+
+
+def test_no_trade_band_skips_small_resizes_but_allows_exits():
+    idx = pd.bdate_range("2024-01-01", periods=6)
+    o = pd.DataFrame({"A": [10.0, 10, 10, 10, 10, 10], "B": [10.0, 10, 11, 11, 11, 11]}, index=idx)
+    c = o.copy()
+    w = pd.DataFrame(np.nan, index=idx, columns=["A", "B"])
+    w.iloc[0] = [0.5, 0.5]
+    w.iloc[2] = [0.5, 0.5]      # tiny drift fix: should be skipped with a 3% band
+    w.iloc[4] = [0.0, 1.0]      # full exit of A: must go through
+    r = run_backtest(o, c, w, ZeroCosts(), 1000, fractional=True, min_trade_frac=0.03)
+    assert (r.trades["date"] == idx[3]).sum() == 0
+    assert r.holdings["A"].iloc[5] == 0

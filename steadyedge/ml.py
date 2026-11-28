@@ -39,6 +39,35 @@ def make_features(close: pd.DataFrame) -> dict[str, pd.DataFrame]:
     return {k: v.rank(axis=1, pct=True) for k, v in f.items()}
 
 
+def make_context(close: pd.DataFrame, assets: list[str], market: str | None,
+                 context: list[str]) -> dict[str, pd.DataFrame]:
+    """Market-wide signals, the same value for every asset on a date. Trees
+    can combine them with asset features ("momentum works less when VIX is
+    high"). Built from prices up to t only."""
+    out = {}
+
+    def bcast(s: pd.Series) -> pd.DataFrame:
+        return pd.DataFrame({a: s for a in assets}, index=close.index)
+
+    if market:
+        m = close[market]
+        out["mkt_r63"] = bcast(m.pct_change(63, fill_method=None))
+        out["mkt_dist200"] = bcast(m / m.rolling(200).mean() - 1)
+        out["mkt_vol21"] = bcast(m.pct_change(fill_method=None).rolling(21).std())
+    for c in context:
+        if c not in close:
+            continue
+        x = close[c].ffill()
+        key = c.strip("^").lower()
+        if key in ("vix", "indiavix"):
+            out[f"{key}_level"] = bcast(x)
+            out[f"{key}_vs_1y"] = bcast(x / x.rolling(252).mean() - 1)
+        else:  # interest-rate series quoted in percent
+            out[f"{key}_level"] = bcast(x)
+            out[f"{key}_chg63"] = bcast(x - x.shift(63))
+    return out
+
+
 def _stack(feats: dict, dates) -> pd.DataFrame:
     cols = {k: v.loc[dates].stack(future_stack=True) for k, v in feats.items()}
     return pd.DataFrame(cols)
@@ -46,11 +75,14 @@ def _stack(feats: dict, dates) -> pd.DataFrame:
 
 def ml_rank(close: pd.DataFrame, top_n: int = 3, horizon: int = 21, embargo: int = 5,
             train_years: int = 5, freq: str = "M", universe: list[str] | None = None,
-            min_train_rows: int = 500, seed: int = 0, max_iter: int = 150) -> pd.DataFrame:
+            min_train_rows: int = 500, seed: int = 0, max_iter: int = 150,
+            market: str | None = None, context: list[str] | None = None) -> pd.DataFrame:
     from sklearn.ensemble import HistGradientBoostingRegressor
 
     px = close[universe] if universe else close
     feats = make_features(px)
+    if market or context:
+        feats.update(make_context(close, list(px.columns), market, context or []))
     fwd = px.shift(-horizon) / px - 1                     # label: used ONLY for rows purged below
     label = fwd.rank(axis=1, pct=True)
     idx = px.index

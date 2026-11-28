@@ -139,7 +139,7 @@ h1{margin:0 0 4px;font-size:28px}h2{margin-top:44px;border-top:1px solid var(--g
 .muted{color:var(--text-secondary);font-size:13px}.note{background:var(--surface-2);padding:10px 14px;border-radius:8px;font-size:14px}
 .disclaimer{background:var(--surface-2);border-left:4px solid var(--series-2);padding:12px 16px;border-radius:6px;font-size:14px}
 table{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
-th,td{text-align:right;padding:6px 8px;border-bottom:1px solid var(--grid);white-space:nowrap}th:first-child,td:first-child{text-align:left}
+th,td{text-align:right;padding:6px 8px;border-bottom:1px solid var(--grid);white-space:nowrap}th:first-child,td:first-child{text-align:left}.lb td:nth-child(2),.lb th:nth-child(2){text-align:left}
 th{color:var(--text-secondary);font-weight:600}.scroll{overflow-x:auto}
 .gate{list-style:none;padding:0}.gate li{padding:2px 0}.gate .pass span[aria-hidden]{color:var(--good)}.gate .fail span[aria-hidden]{color:var(--bad)}
 details{margin:12px 0}summary{cursor:pointer;color:var(--text-secondary)}
@@ -209,6 +209,40 @@ for(const [id,c] of Object.entries(DATA)) draw('chart-'+id,c);
 </script></body></html>"""
 
 
+def leaderboard() -> str:
+    """Every version side by side, per market, on its out-of-sample window."""
+    out = []
+    for mk, title, cur in (("us", "United States", "$"), ("india", "India", "Rs ")):
+        rows, oos = [], set()
+        for name, t, _ in discover():
+            meta = json.loads((RESULTS / name / "run_meta.json").read_text())
+            if meta["config"]["market"] != mk or meta.get("used_holdout"):
+                continue
+            m = json.loads((RESULTS / name / "metrics.json").read_text())
+            oos.add(f"{meta['oos_start']} to {meta['data_end']}")
+            if not rows:
+                b = m["benchmark_buy_hold"]
+                rows.append(f"<tr><td>Index, buy and hold</td><td>—</td><td>{pct(b['cagr'])}</td>"
+                            f"<td>{pct(b['max_drawdown'])}</td><td>—</td><td>—</td><td>{pct(b['cost_drag_pct_of_capital_per_year'])}</td></tr>")
+            for key, lab in (("blend_fixed_80", "80/20 blend"), ("active_only", "active only")):
+                v = m[key]
+                conf = "" if v.get("dsr_vs_index") is None else f"{v['dsr_vs_index']:.2f}"
+                rows.append(f"<tr><td><a href='#{name}'>{html.escape(t.split(':')[0])}</a> {lab}</td>"
+                            f"<td>{html.escape(t.split(':', 1)[-1].strip())}</td><td>{pct(v['cagr'])}</td>"
+                            f"<td>{pct(v['max_drawdown'])}</td><td>{pct(v.get('excess_cagr'))}</td><td>{conf}</td>"
+                            f"<td>{pct(v['cost_drag_pct_of_capital_per_year'])}</td></tr>")
+        if len(rows) > 1:
+            out.append(f"<h3>{title}</h3><p class='muted'>Out-of-sample window: {', '.join(sorted(oos))}</p>"
+                       "<div class='scroll'><table class='lb'><thead><tr><th>Version</th><th>Idea</th><th>CAGR</th><th>Max drawdown</th>"
+                       "<th>vs index / yr</th><th>Edge confidence</th><th>Costs / yr</th></tr></thead><tbody>"
+                       + "".join(rows) + "</tbody></table></div>")
+    if not out:
+        return ""
+    return ("<section><h2 id='leaderboard'>Leaderboard: every version vs the index</h2>"
+            "<p>Each new version changes one thing and is compared on the same years. Edge confidence is the "
+            "Deflated Sharpe of the return over the index; 0.95 is the bar.</p>" + "".join(out) + "</section>")
+
+
 def paper_section() -> tuple[str, dict]:
     root = ROOT / "paper"
     parts, data = [], {}
@@ -243,14 +277,14 @@ def paper_section() -> tuple[str, dict]:
 
 def main() -> None:
     psec, data = paper_section()
-    sections = [psec] if psec else []
+    sections = ([psec] if psec else []) + [leaderboard()]
     for name, title, cur in discover():
         s, c = market_section(name, title, cur)
         sections.append(s)
         if c:
             data[name] = c
     updated = pd.Timestamp.now(tz="UTC").strftime("%Y-%m-%d %H:%M UTC")
-    toc = "<nav><a href='#paper'>Paper trading</a> · <strong>Experiments:</strong> " + " · ".join(
+    toc = "<nav><a href='#paper'>Paper trading</a> · <a href='#leaderboard'>Leaderboard</a> · <strong>Experiments:</strong> " + " · ".join(
         f"<a href='#{n}'>{html.escape(t)}</a>" for n, t, _ in discover()) + "</nav>"
     page = PAGE.replace("__TOC__", toc).replace("__SECTIONS__", "\n".join(sections)) \
                .replace("__DATA__", json.dumps(data)).replace("__UPDATED__", updated)

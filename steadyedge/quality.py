@@ -26,6 +26,8 @@ def fix_unadjusted_splits(open_: pd.DataFrame, close: pd.DataFrame, min_jump: fl
     open_, close = open_.copy(), close.copy()
     log = []
     for t in close.columns:
+        if str(t).startswith("^"):   # indexes / VIX / yields: big moves are real, no splits
+            continue
         c = close[t]
         valid = c.dropna()
         r = valid / valid.shift(1)

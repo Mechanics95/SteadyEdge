@@ -91,6 +91,36 @@ def momentum(close: pd.DataFrame, lookback: int = 252, skip: int = 21, top_n: in
     return _on_rebalance(w, freq)
 
 
+def momentum_buffered(close: pd.DataFrame, lookback: int = 252, skip: int = 21, top_n: int = 3,
+                      buffer: int = 2, freq: str = "M", universe: list[str] | None = None,
+                      abs_filter: bool = True) -> pd.DataFrame:
+    """Momentum that trades less: a name already held is kept while its rank
+    stays within top_n + buffer (and momentum stays positive if abs_filter).
+    Only freed slots are refilled from the top. Cuts turnover, which matters
+    most where per-trade costs are high (India: STT, DP charges)."""
+    px = close[universe] if universe else close
+    mom = px.shift(skip) / px.shift(lookback) - 1
+    ranks = mom.rank(axis=1, ascending=False, method="first")
+    mask = rebalance_mask(close.index, freq)
+    w = pd.DataFrame(np.nan, index=close.index, columns=close.columns)
+    held: list[str] = []
+    for i in np.where(mask)[0]:
+        m, r = mom.iloc[i], ranks.iloc[i]
+        if m.notna().sum() < top_n:
+            continue
+        ok = lambda c: pd.notna(m[c]) and (m[c] > 0 or not abs_filter)
+        held = [c for c in held if ok(c) and r[c] <= top_n + buffer]
+        for c in r.dropna().sort_values().index:
+            if len(held) >= top_n:
+                break
+            if c not in held and ok(c):
+                held.append(c)
+        row = pd.Series(0.0, index=close.columns)
+        row[held] = 1.0 / top_n
+        w.iloc[i] = row.to_numpy()
+    return w
+
+
 def rsi(px: pd.Series, n: int = 14) -> pd.Series:
     d = px.diff()
     up = d.clip(lower=0).ewm(alpha=1 / n, adjust=False, min_periods=n).mean()
@@ -125,5 +155,6 @@ STRATEGIES = {
     "buy_and_hold": buy_and_hold,
     "trend_filter": trend_filter,
     "momentum": momentum,
+    "momentum_buffered": momentum_buffered,
     "rsi_reversion": rsi_reversion,
 }
