@@ -9,9 +9,9 @@
   "last_run": {
     "date": "2026-11-27",
     "equity": 44000.0,
-    "index_hold": 44000.0,
+    "index_hold": NaN,
     "return_since_start": 0.0,
-    "index_return_since_start": 0.0,
+    "index_return_since_start": NaN,
     "day_pnl": 0.0,
     "action": "rebalance",
     "active_params": {
