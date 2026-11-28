@@ -1,9 +1,9 @@
 {
-  "run_id": "20261128T045404Z-9acca3",
+  "run_id": "20261128T091918Z-1d6b05",
   "family": "india",
   "config_name": "india_mlctx_v5",
-  "git_commit": "b398cf4",
-  "data_fingerprint": "d65568e89a5d",
+  "git_commit": "470c8c4",
+  "data_fingerprint": "787fcca657a3",
   "used_holdout": false,
   "oos_start": "2014-01-11",
   "data_end": "2024-12-31",
@@ -14,7 +14,7 @@
       "chosen": {
         "top_n": 3
       },
-      "train_sharpe": 0.55
+      "train_sharpe": 0.515
     },
     {
       "train": "2010-01-11..2015-01-11",
@@ -22,7 +22,7 @@
       "chosen": {
         "top_n": 3
       },
-      "train_sharpe": 0.824
+      "train_sharpe": 0.792
     },
     {
       "train": "2011-01-11..2016-01-11",
@@ -30,7 +30,7 @@
       "chosen": {
         "top_n": 3
       },
-      "train_sharpe": 0.598
+      "train_sharpe": 0.57
     },
     {
       "train": "2012-01-11..2017-01-11",
@@ -38,7 +38,7 @@
       "chosen": {
         "top_n": 3
       },
-      "train_sharpe": 0.873
+      "train_sharpe": 0.85
     },
     {
       "train": "2013-01-11..2018-01-11",
@@ -46,7 +46,7 @@
       "chosen": {
         "top_n": 3
       },
-      "train_sharpe": 0.647
+      "train_sharpe": 0.646
     },
     {
       "train": "2014-01-11..2019-01-11",
@@ -62,7 +62,7 @@
       "chosen": {
         "top_n": 3
       },
-      "train_sharpe": 0.405
+      "train_sharpe": 0.439
     },
     {
       "train": "2016-01-11..2021-01-11",
@@ -70,7 +70,7 @@
       "chosen": {
         "top_n": 3
       },
-      "train_sharpe": 0.752
+      "train_sharpe": 0.739
     },
     {
       "train": "2017-01-11..2022-01-11",
@@ -78,7 +78,7 @@
       "chosen": {
         "top_n": 3
       },
-      "train_sharpe": 0.855
+      "train_sharpe": 0.805
     },
     {
       "train": "2018-01-11..2023-01-11",
@@ -86,7 +86,7 @@
       "chosen": {
         "top_n": 3
       },
-      "train_sharpe": 0.5
+      "train_sharpe": 0.455
     },
     {
       "train": "2019-01-11..2024-01-11",
@@ -94,7 +94,7 @@
       "chosen": {
         "top_n": 3
       },
-      "train_sharpe": 0.672
+      "train_sharpe": 0.625
     }
   ],
   "data_fixes": [

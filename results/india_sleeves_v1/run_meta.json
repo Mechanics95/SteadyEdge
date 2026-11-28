@@ -1,9 +1,9 @@
 {
-  "run_id": "20261128T045418Z-ebc9da",
+  "run_id": "20261128T091937Z-260aa3",
   "family": "india",
   "config_name": "india_sleeves_v1",
-  "git_commit": "b398cf4",
-  "data_fingerprint": "47d6611bb35d",
+  "git_commit": "470c8c4",
+  "data_fingerprint": "25c4a98a7917",
   "used_holdout": false,
   "oos_start": "2014-01-11",
   "data_end": "2024-12-31",

@@ -2,7 +2,7 @@
 
 > Research output, not financial advice. Backtests are simulations on past data and do not guarantee future results.
 
-- Run: `20261128T045434Z-fc1a7b` · commit `b398cf4` · data `09cc34472fad`
+- Run: `20261128T091956Z-0e21d2` · commit `470c8c4` · data `b27c5fc38e01`
 - Out-of-sample window: 2014-01-11 to 2024-12-31 (walk-forward; holdout sealed from 2025-01-01)
 - Capital Rs 44,000, kill switch at Rs 22000 loss, whole shares, costs: india model
 - Trials counted for this family so far: 130

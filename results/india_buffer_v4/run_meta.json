@@ -1,9 +1,9 @@
 {
-  "run_id": "20261128T045328Z-9ebff5",
+  "run_id": "20261128T091834Z-c34b75",
   "family": "india",
   "config_name": "india_buffer_v4",
-  "git_commit": "b398cf4",
-  "data_fingerprint": "5abe0a194f5b",
+  "git_commit": "470c8c4",
+  "data_fingerprint": "44ff35ad73ac",
   "used_holdout": false,
   "oos_start": "2014-01-11",
   "data_end": "2024-12-31",
