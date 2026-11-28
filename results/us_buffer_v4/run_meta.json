@@ -1,0 +1,235 @@
+{
+  "run_id": "20261128T045449Z-3ce290",
+  "family": "us",
+  "config_name": "us_buffer_v4",
+  "git_commit": "b398cf4",
+  "data_fingerprint": "5de1f6fb7000",
+  "used_holdout": false,
+  "oos_start": "2013-01-14",
+  "data_end": "2024-12-31",
+  "walk_forward_folds": [
+    {
+      "train": "2008-01-14..2013-01-14",
+      "test": "2013-01-14..2014-01-14",
+      "chosen": {
+        "lookback": 252,
+        "top_n": 3
+      },
+      "train_sharpe": 0.383
+    },
+    {
+      "train": "2009-01-14..2014-01-14",
+      "test": "2014-01-14..2015-01-14",
+      "chosen": {
+        "lookback": 126,
+        "top_n": 4
+      },
+      "train_sharpe": 0.964
+    },
+    {
+      "train": "2010-01-14..2015-01-14",
+      "test": "2015-01-14..2016-01-14",
+      "chosen": {
+        "lookback": 126,
+        "top_n": 4
+      },
+      "train_sharpe": 0.869
+    },
+    {
+      "train": "2011-01-14..2016-01-14",
+      "test": "2016-01-14..2017-01-14",
+      "chosen": {
+        "lookback": 126,
+        "top_n": 4
+      },
+      "train_sharpe": 0.666
+    },
+    {
+      "train": "2012-01-14..2017-01-14",
+      "test": "2017-01-14..2018-01-14",
+      "chosen": {
+        "lookback": 252,
+        "top_n": 4
+      },
+      "train_sharpe": 0.83
+    },
+    {
+      "train": "2013-01-14..2018-01-14",
+      "test": "2018-01-14..2019-01-14",
+      "chosen": {
+        "lookback": 252,
+        "top_n": 4
+      },
+      "train_sharpe": 1.072
+    },
+    {
+      "train": "2014-01-14..2019-01-14",
+      "test": "2019-01-14..2020-01-14",
+      "chosen": {
+        "lookback": 126,
+        "top_n": 3
+      },
+      "train_sharpe": 0.608
+    },
+    {
+      "train": "2015-01-14..2020-01-14",
+      "test": "2020-01-14..2021-01-14",
+      "chosen": {
+        "lookback": 126,
+        "top_n": 3
+      },
+      "train_sharpe": 0.811
+    },
+    {
+      "train": "2016-01-14..2021-01-14",
+      "test": "2021-01-14..2022-01-14",
+      "chosen": {
+        "lookback": 126,
+        "top_n": 4
+      },
+      "train_sharpe": 0.766
+    },
+    {
+      "train": "2017-01-14..2022-01-14",
+      "test": "2022-01-14..2023-01-14",
+      "chosen": {
+        "lookback": 252,
+        "top_n": 4
+      },
+      "train_sharpe": 0.82
+    },
+    {
+      "train": "2018-01-14..2023-01-14",
+      "test": "2023-01-14..2024-01-14",
+      "chosen": {
+        "lookback": 252,
+        "top_n": 2
+      },
+      "train_sharpe": 0.581
+    },
+    {
+      "train": "2019-01-14..2024-01-14",
+      "test": "2024-01-14..2024-12-31",
+      "chosen": {
+        "lookback": 252,
+        "top_n": 2
+      },
+      "train_sharpe": 0.705
+    }
+  ],
+  "data_fixes": [],
+  "config": {
+    "name": "us_buffer_v4",
+    "title": "US v4: trend-filtered index + low-turnover momentum",
+    "market": "us",
+    "family": "us",
+    "capital": 500,
+    "min_trade_frac": 0.03,
+    "fractional": true,
+    "max_loss": 250,
+    "start": "2007-01-01",
+    "download_start": "2005-01-01",
+    "holdout_start": "2025-01-01",
+    "benchmark": "SPY",
+    "universe": [
+      "SPY",
+      "QQQ",
+      "IWM",
+      "EFA",
+      "EEM",
+      "TLT",
+      "IEF",
+      "GLD",
+      "XLK",
+      "XLF",
+      "XLE",
+      "XLV",
+      "XLY",
+      "XLP",
+      "XLI",
+      "XLU",
+      "XLB"
+    ],
+    "stable": {
+      "strategy": "trend_filter",
+      "params": {
+        "asset": "SPY",
+        "window": 200,
+        "off_asset": "IEF",
+        "freq": "W"
+      }
+    },
+    "active": {
+      "strategy": "momentum_buffered",
+      "params": {
+        "buffer": 2,
+        "skip": 21,
+        "freq": "M",
+        "universe": [
+          "QQQ",
+          "IWM",
+          "EFA",
+          "EEM",
+          "TLT",
+          "IEF",
+          "GLD",
+          "XLK",
+          "XLF",
+          "XLE",
+          "XLV",
+          "XLY",
+          "XLP",
+          "XLI",
+          "XLU",
+          "XLB"
+        ]
+      },
+      "grid": {
+        "lookback": [
+          126,
+          252
+        ],
+        "top_n": [
+          2,
+          3,
+          4
+        ]
+      }
+    },
+    "train_years": 5,
+    "test_years": 1,
+    "allocations": [
+      {
+        "rule": "fixed",
+        "stable_share": 0.9
+      },
+      {
+        "rule": "fixed",
+        "stable_share": 0.8
+      },
+      {
+        "rule": "fixed",
+        "stable_share": 0.7
+      },
+      {
+        "rule": "fixed",
+        "stable_share": 0.6
+      },
+      {
+        "rule": "fixed",
+        "stable_share": 0.5
+      },
+      {
+        "rule": "vol_target",
+        "stable_share": 0.8,
+        "target_vol": 0.15,
+        "max_active": 0.4
+      },
+      {
+        "rule": "drawdown_throttle",
+        "stable_share": 0.7,
+        "dd_limit": -0.15
+      }
+    ]
+  }
+}

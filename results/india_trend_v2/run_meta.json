@@ -1,9 +1,9 @@
 {
-  "run_id": "20261127T055101Z-b604f4",
+  "run_id": "20261128T045434Z-fc1a7b",
   "family": "india",
   "config_name": "india_trend_v2",
-  "git_commit": "a443e01",
-  "data_fingerprint": "3512ce28ebce",
+  "git_commit": "b398cf4",
+  "data_fingerprint": "09cc34472fad",
   "used_holdout": false,
   "oos_start": "2014-01-11",
   "data_end": "2024-12-31",

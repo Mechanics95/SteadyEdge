@@ -2,25 +2,25 @@
 
 > Research output, not financial advice. Backtests are simulations on past data and do not guarantee future results.
 
-- Run: `20261127T055049Z-8d55ef` · commit `a443e01` · data `0f70245303e3`
+- Run: `20261128T045418Z-ebc9da` · commit `b398cf4` · data `47d6611bb35d`
 - Out-of-sample window: 2014-01-11 to 2024-12-31 (walk-forward; holdout sealed from 2025-01-01)
 - Capital Rs 44,000, kill switch at Rs 22000 loss, whole shares, costs: india model
-- Trials counted for this family so far: 70
+- Trials counted for this family so far: 130
 
 ## Results (out-of-sample only)
 
 | variant | cagr | vol | sharpe | max_drawdown | worst_12m | annual_turnover | cost_drag_pct_of_capital_per_year | excess_cagr | dsr | dsr_vs_index | final_equity | killed_on |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| benchmark_buy_hold | 0.1424 | 0.148 | 0.974 | -0.3633 | -0.2875 | 0.09 | 0.0002 | 0.0 | 0.994 | None | 183546.0 | None |
-| stable_only | 0.1424 | 0.148 | 0.974 | -0.3633 | -0.2875 | 0.09 | 0.0002 | 0.0 | 0.994 | None | 183546.0 | None |
-| active_only | 0.1775 | 0.2062 | 0.896 | -0.3678 | -0.241 | 7.42 | 0.0491 | 0.0351 | 0.989 | 0.624 | 254122.0 | None |
-| blend_fixed_90 | 0.1413 | 0.1457 | 0.981 | -0.3577 | -0.2816 | 0.73 | 0.011 | -0.0011 | 0.994 | 0.191 | 181759.6 | None |
-| blend_fixed_80 | 0.1473 | 0.1475 | 1.006 | -0.3571 | -0.2775 | 1.54 | 0.0161 | 0.0049 | 0.996 | 0.464 | 192306.4 | None |
-| blend_fixed_70 | 0.1502 | 0.1508 | 1.004 | -0.3544 | -0.2693 | 2.28 | 0.0197 | 0.0078 | 0.995 | 0.489 | 197586.4 | None |
-| blend_fixed_60 | 0.1561 | 0.1554 | 1.012 | -0.3535 | -0.2625 | 3.06 | 0.0244 | 0.0137 | 0.996 | 0.562 | 208736.0 | None |
-| blend_fixed_50 | 0.1607 | 0.1614 | 1.005 | -0.3562 | -0.257 | 3.81 | 0.0286 | 0.0183 | 0.995 | 0.589 | 217734.0 | None |
-| blend_vol_target | 0.1575 | 0.1557 | 1.018 | -0.3535 | -0.2625 | 3.07 | 0.0246 | 0.0151 | 0.996 | 0.591 | 211283.6 | None |
-| blend_drawdown_throttle | 0.1463 | 0.1511 | 0.98 | -0.3573 | -0.2741 | 2.28 | 0.0198 | 0.0039 | 0.994 | 0.401 | 190462.8 | None |
+| benchmark_buy_hold | 0.1424 | 0.148 | 0.974 | -0.3633 | -0.2875 | 0.09 | 0.0002 | 0.0 | 0.439 | None | 183546.0 | None |
+| stable_only | 0.1424 | 0.148 | 0.974 | -0.3633 | -0.2875 | 0.09 | 0.0002 | 0.0 | 0.439 | None | 183546.0 | None |
+| active_only | 0.1775 | 0.2062 | 0.896 | -0.3678 | -0.241 | 7.42 | 0.0491 | 0.0351 | 0.344 | 0.007 | 254122.0 | None |
+| blend_fixed_90 | 0.1413 | 0.1457 | 0.981 | -0.3577 | -0.2816 | 0.73 | 0.011 | -0.0011 | 0.448 | 0.0 | 181759.6 | None |
+| blend_fixed_80 | 0.1473 | 0.1475 | 1.006 | -0.3571 | -0.2775 | 1.54 | 0.0161 | 0.0049 | 0.48 | 0.002 | 192306.4 | None |
+| blend_fixed_70 | 0.1502 | 0.1508 | 1.004 | -0.3544 | -0.2693 | 2.28 | 0.0197 | 0.0078 | 0.477 | 0.003 | 197586.4 | None |
+| blend_fixed_60 | 0.1561 | 0.1554 | 1.012 | -0.3535 | -0.2625 | 3.06 | 0.0244 | 0.0137 | 0.488 | 0.004 | 208736.0 | None |
+| blend_fixed_50 | 0.1607 | 0.1614 | 1.005 | -0.3562 | -0.257 | 3.81 | 0.0286 | 0.0183 | 0.479 | 0.005 | 217734.0 | None |
+| blend_vol_target | 0.1575 | 0.1557 | 1.018 | -0.3535 | -0.2625 | 3.07 | 0.0246 | 0.0151 | 0.495 | 0.005 | 211283.6 | None |
+| blend_drawdown_throttle | 0.1463 | 0.1511 | 0.98 | -0.3573 | -0.2741 | 2.28 | 0.0198 | 0.0039 | 0.447 | 0.001 | 190462.8 | None |
 
 ## Walk-forward choices for the active sleeve
 

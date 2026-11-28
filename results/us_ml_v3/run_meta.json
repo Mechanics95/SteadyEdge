@@ -1,9 +1,9 @@
 {
-  "run_id": "20261127T055116Z-643e33",
+  "run_id": "20261128T045506Z-474d41",
   "family": "us",
   "config_name": "us_ml_v3",
-  "git_commit": "a443e01",
-  "data_fingerprint": "e04d675f5749",
+  "git_commit": "b398cf4",
+  "data_fingerprint": "5e3dc40ad7d7",
   "used_holdout": false,
   "oos_start": "2013-01-14",
   "data_end": "2024-12-31",
@@ -14,7 +14,7 @@
       "chosen": {
         "top_n": 3
       },
-      "train_sharpe": 0.119
+      "train_sharpe": 0.112
     },
     {
       "train": "2009-01-14..2014-01-14",
@@ -22,7 +22,7 @@
       "chosen": {
         "top_n": 3
       },
-      "train_sharpe": 0.403
+      "train_sharpe": 0.394
     },
     {
       "train": "2010-01-14..2015-01-14",
@@ -30,15 +30,15 @@
       "chosen": {
         "top_n": 3
       },
-      "train_sharpe": 0.598
+      "train_sharpe": 0.588
     },
     {
       "train": "2011-01-14..2016-01-14",
       "test": "2016-01-14..2017-01-14",
       "chosen": {
-        "top_n": 3
+        "top_n": 2
       },
-      "train_sharpe": 0.424
+      "train_sharpe": 0.43
     },
     {
       "train": "2012-01-14..2017-01-14",
@@ -46,7 +46,7 @@
       "chosen": {
         "top_n": 3
       },
-      "train_sharpe": 0.578
+      "train_sharpe": 0.544
     },
     {
       "train": "2013-01-14..2018-01-14",
@@ -54,7 +54,7 @@
       "chosen": {
         "top_n": 3
       },
-      "train_sharpe": 0.769
+      "train_sharpe": 0.733
     },
     {
       "train": "2014-01-14..2019-01-14",
@@ -62,7 +62,7 @@
       "chosen": {
         "top_n": 3
       },
-      "train_sharpe": 0.355
+      "train_sharpe": 0.321
     },
     {
       "train": "2015-01-14..2020-01-14",
@@ -70,15 +70,15 @@
       "chosen": {
         "top_n": 3
       },
-      "train_sharpe": 0.469
+      "train_sharpe": 0.435
     },
     {
       "train": "2016-01-14..2021-01-14",
       "test": "2021-01-14..2022-01-14",
       "chosen": {
-        "top_n": 2
+        "top_n": 3
       },
-      "train_sharpe": 0.605
+      "train_sharpe": 0.587
     },
     {
       "train": "2017-01-14..2022-01-14",
@@ -86,7 +86,7 @@
       "chosen": {
         "top_n": 2
       },
-      "train_sharpe": 0.879
+      "train_sharpe": 0.824
     },
     {
       "train": "2018-01-14..2023-01-14",
@@ -94,15 +94,15 @@
       "chosen": {
         "top_n": 3
       },
-      "train_sharpe": 0.478
+      "train_sharpe": 0.434
     },
     {
       "train": "2019-01-14..2024-01-14",
       "test": "2024-01-14..2024-12-31",
       "chosen": {
-        "top_n": 3
+        "top_n": 2
       },
-      "train_sharpe": 0.632
+      "train_sharpe": 0.582
     }
   ],
   "data_fixes": [],
